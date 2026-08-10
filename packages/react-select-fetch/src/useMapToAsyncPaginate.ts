@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import type { GroupBase } from "react-select";
 import type {
+	GroupBase,
 	LoadOptions,
 	UseAsyncPaginateParams,
 } from "react-select-async-paginate";

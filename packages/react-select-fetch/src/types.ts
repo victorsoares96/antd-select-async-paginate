@@ -1,11 +1,9 @@
 import type { ReactElement } from "react";
 import type {
+	AsyncPaginateProps,
+	ComponentProps,
 	GroupBase,
 	OptionsOrGroups,
-	Props as SelectProps,
-} from "react-select";
-import type {
-	ComponentProps,
 	Response,
 	UseAsyncPaginateBaseParams,
 	UseAsyncPaginateParams,
@@ -72,9 +70,12 @@ export type SelectFetchProps<
 	OptionType,
 	Group extends GroupBase<OptionType>,
 	IsMulti extends boolean,
-> = SelectProps<OptionType, IsMulti, Group> &
+> = Omit<
+	AsyncPaginateProps<OptionType, Group, Additional, IsMulti>,
+	"loadOptions"
+> &
 	UseSelectFetchParams<OptionType, Group> &
-	ComponentProps<OptionType, Group, IsMulti>;
+	ComponentProps<OptionType>;
 
 export type SelectFetchType = <
 	OptionType,

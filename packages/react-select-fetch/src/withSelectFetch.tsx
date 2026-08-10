@@ -1,29 +1,19 @@
-import type { ReactElement, Ref } from "react";
+import type { GetProp, Select as AntdSelect } from "antd";
+import type { ReactElement } from "react";
+import { useCallback } from "react";
 import type {
 	GroupBase,
-	SelectInstance,
-	Props as SelectProps,
-} from "react-select";
-import type { UseAsyncPaginateResult } from "react-select-async-paginate";
-import { useComponents } from "react-select-async-paginate";
+	UseAsyncPaginateResult,
+} from "react-select-async-paginate";
 import type { SelectFetchProps, SelectFetchType } from "./types";
 import { useSelectFetch } from "./useSelectFetch";
 
 const defaultCacheUniqs: unknown[] = [];
-const defaultComponents = {};
 
-type SelectComponentType = <
-	Option = unknown,
-	IsMulti extends boolean = boolean,
-	Group extends GroupBase<Option> = GroupBase<Option>,
->(
-	props: SelectProps<Option, IsMulti, Group> & {
-		ref?: Ref<SelectInstance<Option, IsMulti, Group>>;
-	},
-) => ReactElement;
+type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
 
 export function withSelectFetch(
-	SelectComponent: SelectComponentType,
+	SelectComponent: typeof AntdSelect,
 ): SelectFetchType {
 	function WithSelectFetch<
 		OptionType,
@@ -31,25 +21,49 @@ export function withSelectFetch(
 		IsMulti extends boolean = false,
 	>(props: SelectFetchProps<OptionType, Group, IsMulti>): ReactElement {
 		const {
-			components = defaultComponents,
 			selectRef = undefined,
 			cacheUniqs = defaultCacheUniqs,
+			loading: isLoadingProp,
+			virtual = false,
+			onChange,
 			...rest
 		} = props;
 
 		const asyncPaginateProps: UseAsyncPaginateResult<OptionType, Group> =
 			useSelectFetch(rest, cacheUniqs);
 
-		const processedComponents = useComponents<OptionType, Group, IsMulti>(
-			components,
+		const isLoading =
+			typeof isLoadingProp === "boolean"
+				? isLoadingProp
+				: asyncPaginateProps.isLoading;
+
+		const handleChange = useCallback<AntdOnChange>(
+			(_value, option) => {
+				onChange?.(option as never);
+			},
+			[onChange],
 		);
 
 		return (
 			<SelectComponent
-				{...props}
-				{...asyncPaginateProps}
-				components={processedComponents}
-				ref={selectRef}
+				{...(rest as object)}
+				options={asyncPaginateProps.options as never}
+				searchValue={asyncPaginateProps.inputValue}
+				onSearch={asyncPaginateProps.onInputChange}
+				open={asyncPaginateProps.menuIsOpen}
+				onOpenChange={(open) => {
+					if (open) {
+						asyncPaginateProps.onMenuOpen();
+					} else {
+						asyncPaginateProps.onMenuClose();
+					}
+				}}
+				onPopupScroll={asyncPaginateProps.handlePopupScroll}
+				filterOption={asyncPaginateProps.filterOption as never}
+				loading={isLoading}
+				virtual={virtual}
+				onChange={handleChange}
+				ref={selectRef as never}
 			/>
 		);
 	}
