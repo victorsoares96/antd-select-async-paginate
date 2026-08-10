@@ -1,8 +1,7 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import type { GroupBase, MultiValue } from "react-select";
 import sleep from "sleep-promise";
-import type { LoadOptions } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
 import { AsyncPaginate } from "../../src";
 import type { StoryProps } from "../types";
 
@@ -54,9 +53,7 @@ export const loadOptions: LoadOptions<
 };
 
 export function MenuPlacement(props: MenuPlacementProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
 	const loadOptionsHandler = props?.loadOptions || loadOptions;
 
@@ -73,7 +70,7 @@ export function MenuPlacement(props: MenuPlacementProps): ReactElement {
 			/>
 			<AsyncPaginate
 				{...props}
-				menuPlacement="auto"
+				placement="topLeft"
 				value={value}
 				loadOptions={loadOptionsHandler}
 				onChange={onChange}

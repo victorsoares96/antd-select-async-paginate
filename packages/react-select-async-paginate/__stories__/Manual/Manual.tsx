@@ -1,15 +1,8 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
 
-import type {
-	GroupBase,
-	InputAction,
-	InputActionMeta,
-	MultiValue,
-} from "react-select";
-
 import sleep from "sleep-promise";
-import type { LoadOptions } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
 import { AsyncPaginate } from "../../src";
 
 import type { StoryProps } from "../types";
@@ -62,32 +55,25 @@ export const loadOptions: LoadOptions<
 };
 
 type HistoryItemType = {
-	action: InputAction;
 	inputValue: string;
 };
 
 export function Manual(props: ManualProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 	const [inputValue, onInputChangeRaw] = useState("");
 	const [menuIsOpen, setMenuIsOpen] = useState(false);
 	const [inputHistory, setInputHistory] = useState<HistoryItemType[]>([]);
 
-	const onInputChange = useCallback(
-		(newInputValue: string, { action }: InputActionMeta): void => {
-			setInputHistory((prevInputHistory) => [
-				...prevInputHistory,
-				{
-					inputValue: newInputValue,
-					action,
-				},
-			]);
+	const onInputChange = useCallback((newInputValue: string): void => {
+		setInputHistory((prevInputHistory) => [
+			...prevInputHistory,
+			{
+				inputValue: newInputValue,
+			},
+		]);
 
-			onInputChangeRaw(newInputValue);
-		},
-		[],
-	);
+		onInputChangeRaw(newInputValue);
+	}, []);
 
 	const onMenuOpen = useCallback((): void => {
 		setMenuIsOpen(true);
@@ -132,8 +118,6 @@ export function Manual(props: ManualProps): ReactElement {
 			<table>
 				<thead>
 					<tr>
-						<th>Action</th>
-
 						<th>Value</th>
 					</tr>
 				</thead>
@@ -142,8 +126,6 @@ export function Manual(props: ManualProps): ReactElement {
 					{inputHistory.map((historyItem, index) => (
 						/* biome-ignore lint/suspicious/noArrayIndexKey: Item has no id */
 						<tr key={index}>
-							<td>{historyItem.action}</td>
-
 							<td>{historyItem.inputValue}</td>
 						</tr>
 					))}
