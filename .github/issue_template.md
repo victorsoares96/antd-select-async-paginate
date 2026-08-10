@@ -21,7 +21,7 @@
 
 
 ### What's your environment?
-<!-- Versions of react, react-select, react-select-async-paginate, os/browser, etc. -->
+<!-- Versions of react, antd, antd-select-async-paginate, os/browser, etc. -->
 
 
 ### Other information
