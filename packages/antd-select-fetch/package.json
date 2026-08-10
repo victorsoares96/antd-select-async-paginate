@@ -1,0 +1,68 @@
+{
+  "name": "antd-select-fetch",
+  "version": "0.1.0",
+  "description": "Wrapper above antd-select-async-paginate that loads options from specified url",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "typings": "dist/index.d.ts",
+  "keywords": [
+    "react",
+    "antd",
+    "async",
+    "pagination",
+    "fetch"
+  ],
+  "repository": "git@github.com:victorsoares96/antd-select-async-paginate.git",
+  "homepage": "https://github.com/victorsoares96/antd-select-async-paginate/tree/master/packages/antd-select-fetch",
+  "author": "Victor Soares",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup src/index.ts --sourcemap --format esm,cjs --dts --legacy-output",
+    "lint": "biome check src __stories__",
+    "lint:fix": "biome check src __stories__ --write --unsafe",
+    "format": "biome format src __stories__ --write",
+    "prepare": "bun run build",
+    "test:ts": "tsc --noEmit",
+    "test:unit": "vitest run --browser.headless --coverage.enabled --coverage.all --coverage.include=src",
+    "test:unit:watch": "vitest",
+    "codecov": "codecov -F react_select_fetch"
+  },
+  "peerDependencies": {
+    "antd": "^5.0.0",
+    "antd-select-async-paginate": "^0.1.0",
+    "react": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "qs": "^6.14.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@storybook/react-vite": "^9.1.9",
+    "@types/qs": "^6.14.0",
+    "@types/react": "^19.1.16",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "antd": "^5.22.0",
+    "antd-select-async-paginate": "0.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "sleep-promise": "^9.1.0",
+    "tsup": "^8.5.0",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4",
+    "vitest-browser-react": "^1.0.1",
+    "vitest-fetch-mock": "^0.4.5"
+  }
+}

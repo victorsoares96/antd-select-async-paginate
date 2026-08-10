@@ -1,0 +1,38 @@
+{
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "repository": "git@github.com:vtaits/react-select-async-paginate.git",
+  "author": "Vadim Taits",
+  "license": "MIT",
+  "scripts": {
+    "start": "storybook dev -p 6006",
+    "build": "bun ./scripts/build.ts",
+    "lint": "bun --filter='*' run lint",
+    "lint:fix": "bun --filter='*' run lint:fix",
+    "format": "bun --filter='*' run format",
+    "test:ts": "bun --filter='*' run test:ts",
+    "test:unit": "bun --filter='*' run test:unit",
+    "test": "bun run lint && bun run test:ts && bun run test:unit",
+    "validate": "bun run build && bun run test",
+    "codecov": "bun --filter='*' run codecov"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@storybook/react-vite": "^9.1.9",
+    "@types/bun": "latest",
+    "@vitejs/plugin-react": "^5.0.4",
+    "codecov": "^3.8.3",
+    "cross-env": "^10.1.0",
+    "path": "^0.12.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-refresh": "^0.17.0",
+    "rimraf": "^6.0.1",
+    "storybook": "^9.1.9",
+    "typescript": "5.9.3",
+    "vite": "^7.1.7"
+  }
+}

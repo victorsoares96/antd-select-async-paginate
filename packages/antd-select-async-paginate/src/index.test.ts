@@ -1,0 +1,14 @@
+import { expect, test } from "vitest";
+import * as lib from "./index";
+import { reduceGroupedOptions } from "./reduceGroupedOptions";
+import { useAsyncPaginate } from "./useAsyncPaginate";
+import { useAsyncPaginateBase } from "./useAsyncPaginateBase";
+import { withAsyncPaginate } from "./withAsyncPaginate";
+
+test("should export needed modules", () => {
+	expect(lib.AsyncPaginate).toBeTruthy();
+	expect(lib.reduceGroupedOptions).toBe(reduceGroupedOptions);
+	expect(lib.withAsyncPaginate).toBe(withAsyncPaginate);
+	expect(lib.useAsyncPaginateBase).toBe(useAsyncPaginateBase);
+	expect(lib.useAsyncPaginate).toBe(useAsyncPaginate);
+});
