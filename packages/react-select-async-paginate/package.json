@@ -37,11 +37,11 @@
     "codecov": "codecov -F react_select_async_paginate"
   },
   "peerDependencies": {
+    "antd": "^5.0.0",
     "react": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
-    "react-select": "^5.0.0"
+    "react-dom": "^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@seznam/compose-react-refs": "^1.0.6",
     "@vtaits/use-lazy-ref": "^0.1.4",
     "krustykrab": "^1.1.0",
     "sleep-promise": "^9.1.0",
@@ -51,14 +51,16 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@storybook/react-vite": "^9.1.9",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^24.6.1",
     "@types/react": "^19.1.16",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
+    "antd": "^5.22.0",
     "playwright": "^1.55.1",
     "react": "^19.1.1",
-    "react-select": "^5.10.2",
+    "react-dom": "^19.1.1",
     "tsup": "^8.5.0",
     "typescript": "5.9.3",
     "vitest": "^3.2.4",
