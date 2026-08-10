@@ -1,43 +1,13 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
-import type { GroupBase, MultiValue } from "react-select";
-import type { CreatableProps } from "react-select/creatable";
-import Creatable from "react-select/creatable";
 import sleep from "sleep-promise";
-import type {
-	ComponentProps,
-	LoadOptions,
-	UseAsyncPaginateParams,
-} from "../../src";
-import { withAsyncPaginate } from "../../src";
-
+import type { GroupBase, LoadOptions } from "../../src";
+import { AsyncPaginate } from "../../src";
 import type { StoryProps } from "../types";
-
-type AsyncPaginateCreatableProps<
-	OptionType,
-	Group extends GroupBase<OptionType>,
-	Additional,
-	IsMulti extends boolean,
-> = CreatableProps<OptionType, IsMulti, Group> &
-	UseAsyncPaginateParams<OptionType, Group, Additional> &
-	ComponentProps<OptionType, Group, IsMulti>;
-
-type AsyncPaginateCreatableType = <
-	OptionType,
-	Group extends GroupBase<OptionType>,
-	Additional,
-	IsMulti extends boolean = false,
->(
-	props: AsyncPaginateCreatableProps<OptionType, Group, Additional, IsMulti>,
-) => ReactElement;
 
 type CreatableWithNewOptionsProps = StoryProps & {
 	loadOptions?: LoadOptions<OptionType, GroupBase<OptionType>, null>;
 };
-
-const AsyncPaginateCreatable = withAsyncPaginate(
-	Creatable,
-) as AsyncPaginateCreatableType;
 
 type OptionType = {
 	value: number | string;
@@ -97,26 +67,37 @@ const addNewOption = async (inputValue: string): Promise<OptionType> => {
 
 const increaseUniq = (uniq: number): number => uniq + 1;
 
+// antd's Select has no built-in "Creatable" mode like react-select/creatable.
+// This is a demo-only DIY pattern: show a "Create ..." affordance via
+// notFoundContent when the typed value matches nothing, calling the same
+// onCreateOption-style flow (async add + cache-busting) the old story used.
 export function CreatableWithNewOptions(
 	props: CreatableWithNewOptionsProps,
 ): ReactElement {
 	const [cacheUniq, setCacheUniq] = useState(0);
 	const [isAddingInProgress, setIsAddingInProgress] = useState(false);
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [inputValue, setInputValue] = useState("");
+	const [menuIsOpen, setMenuIsOpen] = useState(false);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
-	const onCreateOption = useCallback(async (inputValue: string) => {
+	const onCreateOption = useCallback(async () => {
 		setIsAddingInProgress(true);
 
 		const newOption = await addNewOption(inputValue);
 
 		setIsAddingInProgress(false);
 		setCacheUniq(increaseUniq);
+		setInputValue("");
+		setMenuIsOpen(false);
 		onChange(newOption);
-	}, []);
+	}, [inputValue]);
 
 	const loadOptionsHandler = props?.loadOptions || loadOptions;
+
+	const exactMatchExists = options.some(
+		(option) => option.label.toLowerCase() === inputValue.toLowerCase(),
+	);
+	const showCreateAffordance = inputValue.length > 0 && !exactMatchExists;
 
 	return (
 		<>
@@ -125,14 +106,29 @@ export function CreatableWithNewOptions(
 					maxWidth: 300,
 				}}
 			>
-				<AsyncPaginateCreatable
+				<AsyncPaginate
 					{...props}
-					isDisabled={isAddingInProgress}
+					disabled={isAddingInProgress}
 					value={value}
+					inputValue={inputValue}
+					onInputChange={setInputValue}
+					menuIsOpen={menuIsOpen}
+					onMenuOpen={() => setMenuIsOpen(true)}
+					onMenuClose={() => setMenuIsOpen(false)}
 					loadOptions={loadOptionsHandler}
-					onCreateOption={onCreateOption}
-					onChange={onChange}
+					onChange={(nextValue) => {
+						onChange(nextValue);
+						setInputValue("");
+					}}
 					cacheUniqs={[cacheUniq]}
+					notFoundContent={
+						showCreateAffordance ? (
+							// biome-ignore lint/a11y/useKeyWithClickEvents: story-only demo affordance
+							<div onClick={onCreateOption} style={{ cursor: "pointer" }}>
+								Create "{inputValue}"
+							</div>
+						) : undefined
+					}
 				/>
 			</div>
 

@@ -1,13 +1,9 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import type { GroupBase, MultiValue } from "react-select";
-import CreatableSelect from "react-select/creatable";
 import sleep from "sleep-promise";
-import type { LoadOptions } from "../../src";
-import { withAsyncPaginate } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
+import { AsyncPaginate } from "../../src";
 import type { StoryProps } from "../types";
-
-const AsyncPaginateCreatable = withAsyncPaginate(CreatableSelect);
 
 type CreatableStoryProps = StoryProps & {
 	loadOptions?: LoadOptions<OptionType, GroupBase<OptionType>, null>;
@@ -56,12 +52,27 @@ export const loadOptions: LoadOptions<
 	};
 };
 
+// antd's Select has no built-in "Creatable" mode like react-select/creatable.
+// This is a demo-only DIY pattern: show a "Create ..." affordance via
+// notFoundContent when the typed value matches nothing, and manually
+// select+close on click.
 export function Creatable(props: CreatableStoryProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
+	const [inputValue, setInputValue] = useState("");
+	const [menuIsOpen, setMenuIsOpen] = useState(false);
 
 	const loadOptionsHandler = props?.loadOptions || loadOptions;
+
+	const exactMatchExists = options.some(
+		(option) => option.label.toLowerCase() === inputValue.toLowerCase(),
+	);
+	const showCreateAffordance = inputValue.length > 0 && !exactMatchExists;
+
+	const createOption = () => {
+		onChange({ label: inputValue, value: inputValue });
+		setInputValue("");
+		setMenuIsOpen(false);
+	};
 
 	return (
 		<div
@@ -69,11 +80,27 @@ export function Creatable(props: CreatableStoryProps): ReactElement {
 				maxWidth: 300,
 			}}
 		>
-			<AsyncPaginateCreatable
+			<AsyncPaginate
 				{...props}
 				value={value}
+				inputValue={inputValue}
+				onInputChange={setInputValue}
+				menuIsOpen={menuIsOpen}
+				onMenuOpen={() => setMenuIsOpen(true)}
+				onMenuClose={() => setMenuIsOpen(false)}
 				loadOptions={loadOptionsHandler}
-				onChange={onChange}
+				onChange={(nextValue) => {
+					onChange(nextValue);
+					setInputValue("");
+				}}
+				notFoundContent={
+					showCreateAffordance ? (
+						// biome-ignore lint/a11y/useKeyWithClickEvents: story-only demo affordance
+						<div onClick={createOption} style={{ cursor: "pointer" }}>
+							Create "{inputValue}"
+						</div>
+					) : undefined
+				}
 			/>
 		</div>
 	);
