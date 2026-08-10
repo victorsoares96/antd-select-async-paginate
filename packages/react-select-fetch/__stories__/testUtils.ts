@@ -38,9 +38,10 @@ export async function clearText(screen: RenderResult) {
 }
 
 export async function scroll(screen: RenderResult, position: number) {
-	const menu = unwrap(getMenu(screen).query());
+	const menu = unwrap(getMenu(screen).query()) as HTMLElement;
 
 	menu.scrollTop = position;
+	menu.dispatchEvent(new Event("scroll", { bubbles: true }));
 }
 
 export function getAllOptions(screen: RenderResult) {
@@ -54,15 +55,18 @@ export function getAllGroups(screen: RenderResult) {
 export function getSingleValue(screen: RenderResult) {
 	return unwrap(
 		screen.baseElement.querySelector(
-			'[class*="-singleValue"]',
+			".ant-select-selection-item",
 		) as HTMLElement | null,
 	);
 }
 
 export function getMultipleValue(screen: RenderResult) {
-	return [...screen.baseElement.querySelectorAll('[class*="-multiValue"]')].map(
-		(el) => el.childNodes[0].textContent,
-	);
+	return [
+		...screen.baseElement.querySelectorAll(".ant-select-selection-item"),
+	].map((el) => {
+		const content = el.querySelector(".ant-select-selection-item-content");
+		return (content ?? el).textContent;
+	});
 }
 
 export function getMenuOption(screen: RenderResult, optionLabel: string) {

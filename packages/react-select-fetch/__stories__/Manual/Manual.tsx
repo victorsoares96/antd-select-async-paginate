@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
-import type { InputAction, InputActionMeta, MultiValue } from "react-select";
 import sleep from "sleep-promise";
 import type { Get } from "../../src";
 import { SelectFetch } from "../../src";
@@ -25,7 +24,6 @@ for (let i = 0; i < 50; ++i) {
 }
 
 type HistoryItemType = {
-	action: InputAction;
 	inputValue: string;
 };
 
@@ -60,27 +58,21 @@ export async function get<Response>(
 }
 
 export function Manual(props: ManualStoryProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 	const [inputValue, onInputChangeRaw] = useState<string>("");
 	const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
 	const [inputHistory, setInputHistory] = useState<HistoryItemType[]>([]);
 
-	const onInputChange = useCallback(
-		(newInputValue: string, { action }: InputActionMeta): void => {
-			setInputHistory((prevInputHistory) => [
-				...prevInputHistory,
-				{
-					inputValue: newInputValue,
-					action,
-				},
-			]);
+	const onInputChange = useCallback((newInputValue: string): void => {
+		setInputHistory((prevInputHistory) => [
+			...prevInputHistory,
+			{
+				inputValue: newInputValue,
+			},
+		]);
 
-			onInputChangeRaw(newInputValue);
-		},
-		[],
-	);
+		onInputChangeRaw(newInputValue);
+	}, []);
 
 	const onMenuOpen = useCallback((): void => {
 		setMenuIsOpen(true);
@@ -129,8 +121,6 @@ export function Manual(props: ManualStoryProps): ReactElement {
 			<table>
 				<thead>
 					<tr>
-						<th>Action</th>
-
 						<th>Value</th>
 					</tr>
 				</thead>
@@ -139,8 +129,6 @@ export function Manual(props: ManualStoryProps): ReactElement {
 					{inputHistory.map((historyItem, index) => (
 						/* biome-ignore lint/suspicious/noArrayIndexKey: Item has no id */
 						<tr key={index}>
-							<td>{historyItem.action}</td>
-
 							<td>{historyItem.inputValue}</td>
 						</tr>
 					))}

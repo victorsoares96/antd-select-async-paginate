@@ -1,37 +1,13 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
-import type { GroupBase, MultiValue } from "react-select";
-import type { CreatableProps } from "react-select/creatable";
-import Creatable from "react-select/creatable";
-import type { ComponentProps } from "react-select-async-paginate";
 import sleep from "sleep-promise";
-import type { Get, UseSelectFetchParams } from "../../src";
-import { withSelectFetch } from "../../src";
+import type { Get } from "../../src";
+import { SelectFetch } from "../../src";
 import type { StoryProps } from "../types";
 
 type CreatableWithNewOptionsStoryProps = StoryProps & {
 	get?: Get;
 };
-
-type SelectFetchCreatableProps<
-	OptionType,
-	Group extends GroupBase<OptionType>,
-	IsMulti extends boolean,
-> = CreatableProps<OptionType, IsMulti, Group> &
-	UseSelectFetchParams<OptionType, Group> &
-	ComponentProps<OptionType, Group, IsMulti>;
-
-type SelectFetchCreatableType = <
-	OptionType,
-	Group extends GroupBase<OptionType>,
-	IsMulti extends boolean = false,
->(
-	props: SelectFetchCreatableProps<OptionType, Group, IsMulti>,
-) => ReactElement;
-
-const SelectFetchCreatable = withSelectFetch(
-	Creatable,
-) as SelectFetchCreatableType;
 
 type OptionType = {
 	value: number | string;
@@ -91,26 +67,36 @@ const addNewOption = async (inputValue: string): Promise<OptionType> => {
 
 const increaseUniq = (uniq: number): number => uniq + 1;
 
+// antd's Select has no built-in "Creatable" mode like react-select/creatable.
+// This is a demo-only DIY pattern: show a "Create ..." affordance via
+// notFoundContent when the typed value matches nothing.
 export function CreatableWithNewOptions(
 	props: CreatableWithNewOptionsStoryProps,
 ): ReactElement {
 	const [cacheUniq, setCacheUniq] = useState(0);
 	const [isAddingInProgress, setIsAddingInProgress] = useState(false);
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [inputValue, setInputValue] = useState("");
+	const [menuIsOpen, setMenuIsOpen] = useState(false);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
-	const onCreateOption = useCallback(async (inputValue: string) => {
+	const onCreateOption = useCallback(async () => {
 		setIsAddingInProgress(true);
 
 		const newOption = await addNewOption(inputValue);
 
 		setIsAddingInProgress(false);
 		setCacheUniq(increaseUniq);
+		setInputValue("");
+		setMenuIsOpen(false);
 		onChange(newOption);
-	}, []);
+	}, [inputValue]);
 
 	const getHandler = props?.get || get;
+
+	const exactMatchExists = options.some(
+		(option) => option.label.toLowerCase() === inputValue.toLowerCase(),
+	);
+	const showCreateAffordance = inputValue.length > 0 && !exactMatchExists;
 
 	return (
 		<div
@@ -118,18 +104,33 @@ export function CreatableWithNewOptions(
 				maxWidth: 300,
 			}}
 		>
-			<SelectFetchCreatable
+			<SelectFetch
 				{...props}
-				isDisabled={isAddingInProgress}
+				disabled={isAddingInProgress}
 				url="/options/"
 				queryParams={{
 					limit: 10,
 				}}
-				onCreateOption={onCreateOption}
 				value={value}
-				onChange={onChange}
+				inputValue={inputValue}
+				onInputChange={setInputValue}
+				menuIsOpen={menuIsOpen}
+				onMenuOpen={() => setMenuIsOpen(true)}
+				onMenuClose={() => setMenuIsOpen(false)}
+				onChange={(nextValue) => {
+					onChange(nextValue);
+					setInputValue("");
+				}}
 				cacheUniqs={[cacheUniq]}
 				get={getHandler}
+				notFoundContent={
+					showCreateAffordance ? (
+						// biome-ignore lint/a11y/useKeyWithClickEvents: story-only demo affordance
+						<div onClick={onCreateOption} style={{ cursor: "pointer" }}>
+							Create "{inputValue}"
+						</div>
+					) : undefined
+				}
 			/>
 
 			<p>Current value is {JSON.stringify(value)}</p>

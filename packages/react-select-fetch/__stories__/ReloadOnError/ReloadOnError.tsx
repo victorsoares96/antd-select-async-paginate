@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import type { MultiValue } from "react-select";
 import sleep from "sleep-promise";
 import type { Get } from "../../src";
 import { SelectFetch } from "../../src";
@@ -63,9 +62,7 @@ export async function get<Response>(
 }
 
 export function ReloadOnError(props: ReloadOnErrorStoryProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
 	const getHandler = props?.get || get;
 	const reloadOnErrorTimeout = props?.reloadOnErrorTimeout || 5000;
