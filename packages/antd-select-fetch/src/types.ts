@@ -1,4 +1,3 @@
-import type { ReactElement } from "react";
 import type {
 	AsyncPaginateProps,
 	ComponentProps,
@@ -7,7 +6,8 @@ import type {
 	Response,
 	UseAsyncPaginateBaseParams,
 	UseAsyncPaginateParams,
-} from "react-select-async-paginate";
+} from "antd-select-async-paginate";
+import type { ReactElement } from "react";
 
 export type Additional = {
 	page: number;

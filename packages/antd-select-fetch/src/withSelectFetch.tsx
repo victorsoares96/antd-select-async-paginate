@@ -1,10 +1,10 @@
-import type { GetProp, Select as AntdSelect } from "antd";
-import type { ReactElement } from "react";
-import { useCallback } from "react";
+import type { Select as AntdSelect, GetProp } from "antd";
 import type {
 	GroupBase,
 	UseAsyncPaginateResult,
-} from "react-select-async-paginate";
+} from "antd-select-async-paginate";
+import type { ReactElement } from "react";
+import { useCallback } from "react";
 import type { SelectFetchProps, SelectFetchType } from "./types";
 import { useSelectFetch } from "./useSelectFetch";
 

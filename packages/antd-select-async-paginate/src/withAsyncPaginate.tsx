@@ -1,4 +1,4 @@
-import type { GetProp, Select as AntdSelect } from "antd";
+import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref } from "react";
 import { useCallback } from "react";
 import type {

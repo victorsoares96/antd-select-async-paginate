@@ -1,7 +1,6 @@
-import type { GroupBase } from "./types";
 import { expect, test } from "vitest";
 import { getInitialCache } from "./getInitialCache";
-import type { UseAsyncPaginateBaseParams } from "./types";
+import type { GroupBase, UseAsyncPaginateBaseParams } from "./types";
 
 const defaultParams: UseAsyncPaginateBaseParams<
 	unknown,

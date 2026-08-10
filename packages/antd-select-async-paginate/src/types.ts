@@ -1,5 +1,5 @@
-import type { ReactElement, Ref, UIEvent } from "react";
 import type { SelectProps as AntdSelectProps } from "antd";
+import type { ReactElement, Ref, UIEvent } from "react";
 
 export type RequestOptionsCallerType =
 	| "autoload"
@@ -153,7 +153,7 @@ export type UseAsyncPaginateBaseParams<
 	menuIsOpen: boolean;
 };
 
-export type ComponentProps<OptionType> = {
+export type ComponentProps<_OptionType> = {
 	selectRef?: Ref<HTMLElement>;
 	cacheUniqs?: ReadonlyArray<unknown>;
 };

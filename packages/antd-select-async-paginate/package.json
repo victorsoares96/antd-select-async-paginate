@@ -1,7 +1,7 @@
 {
-  "name": "react-select-async-paginate",
-  "version": "0.7.11",
-  "description": "Wrapper above react-select that supports pagination on menu scroll",
+  "name": "antd-select-async-paginate",
+  "version": "0.1.0",
+  "description": "Wrapper above antd Select that supports pagination on menu scroll",
   "files": [
     "dist"
   ],
@@ -17,13 +17,13 @@
   "typings": "dist/index.d.ts",
   "keywords": [
     "react",
-    "react-select",
+    "antd",
     "async",
     "pagination"
   ],
-  "repository": "git@github.com:vtaits/react-select-async-paginate.git",
-  "homepage": "https://github.com/vtaits/react-select-async-paginate/tree/master/packages/react-select-async-paginate",
-  "author": "Vadim Taits",
+  "repository": "git@github.com:victorsoares96/antd-select-async-paginate.git",
+  "homepage": "https://github.com/victorsoares96/antd-select-async-paginate/tree/master/packages/antd-select-async-paginate",
+  "author": "Victor Soares",
   "license": "MIT",
   "scripts": {
     "build": "tsup src/index.ts --sourcemap --format esm,cjs --dts --legacy-output",

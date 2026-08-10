@@ -125,10 +125,13 @@ export function CreatableWithNewOptions(
 				get={getHandler}
 				notFoundContent={
 					showCreateAffordance ? (
-						// biome-ignore lint/a11y/useKeyWithClickEvents: story-only demo affordance
-						<div onClick={onCreateOption} style={{ cursor: "pointer" }}>
+						<button
+							type="button"
+							onClick={onCreateOption}
+							style={{ cursor: "pointer" }}
+						>
 							Create "{inputValue}"
-						</div>
+						</button>
 					) : undefined
 				}
 			/>

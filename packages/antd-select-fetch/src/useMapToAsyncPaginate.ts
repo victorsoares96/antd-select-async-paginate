@@ -1,10 +1,10 @@
-import { useCallback, useMemo } from "react";
 import type {
 	GroupBase,
 	LoadOptions,
 	UseAsyncPaginateParams,
-} from "react-select-async-paginate";
-import { checkIsResponse } from "react-select-async-paginate";
+} from "antd-select-async-paginate";
+import { checkIsResponse } from "antd-select-async-paginate";
+import { useCallback, useMemo } from "react";
 import { get as defaultGet } from "./get";
 import type { Additional, UseSelectFetchMapParams } from "./types";
 

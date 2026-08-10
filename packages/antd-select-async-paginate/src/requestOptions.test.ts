@@ -1,9 +1,8 @@
-import type { GroupBase } from "./types";
 import sleep from "sleep-promise";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { defaultReduceOptions } from "./defaultReduceOptions";
 import { requestOptions } from "./requestOptions";
-import type { UseAsyncPaginateBaseParams } from "./types";
+import type { GroupBase, UseAsyncPaginateBaseParams } from "./types";
 import { validateResponse } from "./validateResponse";
 
 vi.mock("sleep-promise");

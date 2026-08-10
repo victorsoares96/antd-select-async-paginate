@@ -22,11 +22,7 @@ describe("useAsyncPaginateBase handlePopupScroll", () => {
 			hasMore: false,
 		});
 
-		const params: UseAsyncPaginateBaseParams<
-			OptionType,
-			never,
-			unknown
-		> = {
+		const params: UseAsyncPaginateBaseParams<OptionType, never, unknown> = {
 			loadOptions,
 			inputValue: "",
 			menuIsOpen: true,
@@ -49,11 +45,7 @@ describe("useAsyncPaginateBase handlePopupScroll", () => {
 	test("does nothing when not scrolled near the bottom", () => {
 		const loadOptions = vi.fn();
 
-		const params: UseAsyncPaginateBaseParams<
-			OptionType,
-			never,
-			unknown
-		> = {
+		const params: UseAsyncPaginateBaseParams<OptionType, never, unknown> = {
 			loadOptions,
 			inputValue: "",
 			menuIsOpen: true,

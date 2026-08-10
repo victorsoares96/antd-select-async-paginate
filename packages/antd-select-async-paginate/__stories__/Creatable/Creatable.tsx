@@ -95,10 +95,13 @@ export function Creatable(props: CreatableStoryProps): ReactElement {
 				}}
 				notFoundContent={
 					showCreateAffordance ? (
-						// biome-ignore lint/a11y/useKeyWithClickEvents: story-only demo affordance
-						<div onClick={createOption} style={{ cursor: "pointer" }}>
+						<button
+							type="button"
+							onClick={createOption}
+							style={{ cursor: "pointer" }}
+						>
 							Create "{inputValue}"
-						</div>
+						</button>
 					) : undefined
 				}
 			/>
