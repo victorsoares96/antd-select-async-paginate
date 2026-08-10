@@ -110,6 +110,40 @@ Not required. Function. Post-mapping of loaded options to display them in the me
 
 Ref for the underlying antd `Select` instance.
 
+### isMulti
+
+Not required. Boolean. Convenience for antd's `mode="multiple"`, matching react-select's `isMulti` convention. Ignored if `mode` is passed explicitly.
+
+### selectAllOption
+
+Not required. Function `(inputValue: string) => OptionType | null`. Builds a synthetic "select all" option prepended to the menu (after `mapOptionsForMenu`), called on every render with the current search value so the option can encode it (e.g. an "All matching…" option), or return `null` to show nothing. This library has no default "select all" value shape — you own it entirely, so it's opt-in and never collides with real option values.
+
+Pair it with the exported `resolveSelectAllChange` helper in your `onChange` to make selecting it mutually exclusive with individual options (selecting "all" drops other selections and vice versa):
+
+```javascript
+import { AsyncPaginate, resolveSelectAllChange } from 'antd-select-async-paginate';
+
+const isSelectAllOption = (option) => option.value.startsWith('__all__');
+
+const selectAllOption = (inputValue) =>
+  inputValue
+    ? { value: `__all__:${inputValue}`, label: `All matching "${inputValue}"` }
+    : { value: '__all__', label: 'All' };
+
+<AsyncPaginate
+  mode="multiple"
+  value={value}
+  loadOptions={loadOptions}
+  selectAllOption={selectAllOption}
+  onChange={(nextValue) => {
+    const nextArray = Array.isArray(nextValue) ? nextValue : nextValue ? [nextValue] : [];
+    setValue(resolveSelectAllChange(value, nextArray, isSelectAllOption));
+  }}
+/>
+```
+
+See the `Select all option` story in `__stories__` for a complete example.
+
 ## Differences from react-select-async-paginate
 
 If you're migrating from `react-select-async-paginate`:

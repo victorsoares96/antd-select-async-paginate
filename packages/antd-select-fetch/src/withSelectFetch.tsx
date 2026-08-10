@@ -27,6 +27,8 @@ export function withSelectFetch(
 			virtual = false,
 			showSearch = true,
 			style,
+			mode,
+			isMulti,
 			onChange,
 
 			// UseSelectFetchParams fields (url-fetching config + the
@@ -59,6 +61,7 @@ export function withSelectFetch(
 			defaultInputValue,
 			defaultMenuIsOpen,
 			mapOptionsForMenu,
+			selectAllOption,
 			onInputChange,
 			onMenuClose,
 			onMenuOpen,
@@ -95,6 +98,7 @@ export function withSelectFetch(
 					defaultInputValue,
 					defaultMenuIsOpen,
 					mapOptionsForMenu,
+					selectAllOption,
 					onInputChange,
 					onMenuClose,
 					onMenuOpen,
@@ -122,6 +126,7 @@ export function withSelectFetch(
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
 				showSearch={showSearch}
+				mode={mode ?? (isMulti ? "multiple" : undefined)}
 				style={{ width: "100%", ...style }}
 				open={asyncPaginateProps.menuIsOpen}
 				onOpenChange={(open) => {

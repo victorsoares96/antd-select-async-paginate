@@ -31,6 +31,8 @@ export function withAsyncPaginate(
 			virtual = false,
 			showSearch = true,
 			style,
+			mode,
+			isMulti,
 			onChange,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
@@ -54,6 +56,7 @@ export function withAsyncPaginate(
 			defaultInputValue,
 			defaultMenuIsOpen,
 			mapOptionsForMenu,
+			selectAllOption,
 			onInputChange,
 			onMenuClose,
 			onMenuOpen,
@@ -82,6 +85,7 @@ export function withAsyncPaginate(
 					defaultInputValue,
 					defaultMenuIsOpen,
 					mapOptionsForMenu,
+					selectAllOption,
 					onInputChange,
 					onMenuClose,
 					onMenuOpen,
@@ -112,6 +116,7 @@ export function withAsyncPaginate(
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
 				showSearch={showSearch}
+				mode={mode ?? (isMulti ? "multiple" : undefined)}
 				style={{ width: "100%", ...style }}
 				open={asyncPaginateProps.menuIsOpen}
 				onOpenChange={(open) => {

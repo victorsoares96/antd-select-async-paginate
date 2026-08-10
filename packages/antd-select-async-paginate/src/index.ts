@@ -2,6 +2,7 @@ import { Select } from "antd";
 import { withAsyncPaginate } from "./withAsyncPaginate";
 
 export { reduceGroupedOptions } from "./reduceGroupedOptions";
+export { resolveSelectAllChange } from "./resolveSelectAllChange";
 
 export { withAsyncPaginate };
 

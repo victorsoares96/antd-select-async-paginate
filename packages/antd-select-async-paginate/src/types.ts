@@ -138,6 +138,17 @@ export type UseAsyncPaginateParams<
 	mapOptionsForMenu?: (
 		options: OptionsOrGroups<OptionType, Group>,
 	) => OptionsOrGroups<OptionType, Group>;
+	/**
+	 * Builds a synthetic "select all" option prepended to the menu (after
+	 * `mapOptionsForMenu`). Called with the current search value on every
+	 * render, so the option can encode the active search term (e.g. an
+	 * "All matching…" option) or be hidden entirely by returning `null`.
+	 * Pair with `resolveSelectAllChange` in `onChange` to make selecting it
+	 * mutually exclusive with individual options.
+	 * @param inputValue current search value
+	 * @returns the option to prepend, or `null` to show nothing
+	 */
+	selectAllOption?: (inputValue: string) => OptionType | null;
 	onInputChange?: (newValue: string) => void;
 	onMenuClose?: () => void;
 	onMenuOpen?: () => void;
@@ -156,20 +167,25 @@ export type UseAsyncPaginateBaseParams<
 export type ComponentProps<_OptionType> = {
 	selectRef?: Ref<HTMLElement>;
 	cacheUniqs?: ReadonlyArray<unknown>;
+	/**
+	 * Convenience for antd's `mode="multiple"` — matches react-select's
+	 * `isMulti` convention. Ignored if `mode` is passed explicitly.
+	 */
+	isMulti?: boolean;
 };
 
 export type AsyncPaginateProps<
 	OptionType,
 	Group extends GroupBase<OptionType>,
 	Additional,
-	IsMulti extends boolean,
+	_IsMulti extends boolean,
 > = Omit<
 	AntdSelectProps<OptionType>,
 	"options" | "onChange" | "filterOption" | "value"
 > &
 	UseAsyncPaginateParams<OptionType, Group, Additional> &
 	ComponentProps<OptionType> & {
-		mode?: IsMulti extends true ? "multiple" | "tags" : undefined;
+		mode?: "multiple" | "tags";
 		value?: OptionType | readonly OptionType[] | null;
 		onChange?: (value: OptionType | OptionType[] | null) => void;
 	};
