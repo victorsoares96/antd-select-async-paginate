@@ -1,32 +1,20 @@
+import type { GetProp, Select as AntdSelect } from "antd";
 import type { ReactElement, Ref } from "react";
-import type {
-	GroupBase,
-	SelectInstance,
-	Props as SelectProps,
-} from "react-select";
-import { useComponents } from "./components/useComponents";
+import { useCallback } from "react";
 import type {
 	AsyncPaginateProps,
+	GroupBase,
 	UseAsyncPaginateResult,
 	WithAsyncPaginateType,
 } from "./types";
 import { useAsyncPaginate } from "./useAsyncPaginate";
 
 const defaultCacheUniqs: unknown[] = [];
-const defaultComponents = {};
 
-type SelectComponentType = <
-	Option = unknown,
-	IsMulti extends boolean = boolean,
-	Group extends GroupBase<Option> = GroupBase<Option>,
->(
-	props: SelectProps<Option, IsMulti, Group> & {
-		ref?: Ref<SelectInstance<Option, IsMulti, Group>>;
-	},
-) => ReactElement;
+type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
 
 export function withAsyncPaginate(
-	SelectComponent: SelectComponentType,
+	SelectComponent: typeof AntdSelect,
 ): WithAsyncPaginateType {
 	function WithAsyncPaginate<
 		OptionType,
@@ -37,43 +25,52 @@ export function withAsyncPaginate(
 		props: AsyncPaginateProps<OptionType, Group, Additional, IsMulti>,
 	): ReactElement {
 		const {
-			components = defaultComponents,
 			selectRef = undefined,
-			isLoading: isLoadingProp,
+			loading: isLoadingProp,
 			cacheUniqs = defaultCacheUniqs,
-			menuPlacement,
-			menuShouldScrollIntoView,
+			virtual = false,
+			onChange,
 			...rest
 		} = props;
 
 		const asyncPaginateProps: UseAsyncPaginateResult<OptionType, Group> =
 			useAsyncPaginate(rest, cacheUniqs);
 
-		const processedComponents = useComponents<OptionType, Group, IsMulti>(
-			components,
-		);
-
 		const isLoading =
 			typeof isLoadingProp === "boolean"
 				? isLoadingProp
 				: asyncPaginateProps.isLoading;
 
+		// antd's onChange(value, option) always gives the full option object(s)
+		// as the 2nd argument — that's what this library's value/onChange
+		// contract has always exposed, so ignore the primitive 1st argument.
+		const handleChange = useCallback<AntdOnChange>(
+			(_value, option) => {
+				onChange?.(option as never);
+			},
+			[onChange],
+		);
+
 		return (
 			<SelectComponent
-				{...props}
-				{...asyncPaginateProps}
-				menuPlacement={menuPlacement}
-				// Recount menu position on load options
-				menuShouldScrollIntoView={
-					menuPlacement === "auto"
-						? isLoading
-							? false
-							: menuShouldScrollIntoView
-						: menuShouldScrollIntoView
-				}
-				isLoading={isLoading}
-				components={processedComponents}
-				ref={selectRef}
+				{...(rest as object)}
+				options={asyncPaginateProps.options as never}
+				searchValue={asyncPaginateProps.inputValue}
+				onSearch={asyncPaginateProps.onInputChange}
+				open={asyncPaginateProps.menuIsOpen}
+				onOpenChange={(open) => {
+					if (open) {
+						asyncPaginateProps.onMenuOpen();
+					} else {
+						asyncPaginateProps.onMenuClose();
+					}
+				}}
+				onPopupScroll={asyncPaginateProps.handlePopupScroll}
+				filterOption={asyncPaginateProps.filterOption as never}
+				loading={isLoading}
+				virtual={virtual}
+				onChange={handleChange}
+				ref={selectRef as Ref<never>}
 			/>
 		);
 	}

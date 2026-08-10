@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import type { GroupBase, InputActionMeta } from "react-select";
 import type {
+	GroupBase,
 	UseAsyncPaginateBaseResult,
 	UseAsyncPaginateParams,
 	UseAsyncPaginateResult,
@@ -37,9 +37,9 @@ export const useAsyncPaginate = <
 		typeof menuIsOpenParam === "boolean" ? menuIsOpenParam : menuIsOpenState;
 
 	const onInputChange = useCallback(
-		(nextInputValue: string, actionMeta: InputActionMeta): void => {
+		(nextInputValue: string): void => {
 			if (onInputChangeParam) {
-				onInputChangeParam(nextInputValue, actionMeta);
+				onInputChangeParam(nextInputValue);
 			}
 
 			setInputValue(nextInputValue);

@@ -1,12 +1,10 @@
-import Select from "react-select";
+import { Select } from "antd";
 import { withAsyncPaginate } from "./withAsyncPaginate";
 
-export { wrapMenuList } from "./components/wrapMenuList";
 export { reduceGroupedOptions } from "./reduceGroupedOptions";
 
 export { withAsyncPaginate };
 
-export { useComponents } from "./components/useComponents";
 export { useAsyncPaginate } from "./useAsyncPaginate";
 export { useAsyncPaginateBase } from "./useAsyncPaginateBase";
 export {

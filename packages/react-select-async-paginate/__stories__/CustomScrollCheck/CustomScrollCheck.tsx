@@ -1,10 +1,8 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 
-import type { GroupBase, MultiValue } from "react-select";
-
 import sleep from "sleep-promise";
-import type { LoadOptions, ShouldLoadMore } from "../../src";
+import type { GroupBase, LoadOptions, ShouldLoadMore } from "../../src";
 import { AsyncPaginate } from "../../src";
 
 import type { StoryProps } from "../types";
@@ -67,9 +65,7 @@ const shouldLoadMore: ShouldLoadMore = (
 };
 
 export function CustomScrollCheck(props: CustomScrollCheckProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
 	const loadOptionsHandler = props?.loadOptions || loadOptions;
 

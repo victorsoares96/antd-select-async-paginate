@@ -1,4 +1,4 @@
-import type { GroupBase } from "react-select";
+import type { GroupBase } from "./types";
 import sleep from "sleep-promise";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { defaultReduceOptions } from "./defaultReduceOptions";

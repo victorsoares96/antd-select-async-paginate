@@ -1,4 +1,4 @@
-import type { GroupBase, OptionsOrGroups } from "react-select";
+import type { GroupBase, OptionsOrGroups } from "./types";
 
 export const checkGroup = (group: unknown): group is GroupBase<unknown> => {
 	if (!group) {

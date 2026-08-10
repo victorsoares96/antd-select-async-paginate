@@ -1,10 +1,8 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 
-import type { GroupBase, MultiValue } from "react-select";
-
 import sleep from "sleep-promise";
-import type { LoadOptions } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
 import { AsyncPaginate } from "../../src";
 
 import type { StoryProps } from "../types";
@@ -94,9 +92,7 @@ export const loadPageOptions: LoadOptions<
 export function RequestByPageNumber(
 	props: RequestByPageNumberProps,
 ): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
 	const loadOptionsHandler = props?.loadOptions || loadPageOptions;
 

@@ -1,18 +1,21 @@
-import type { ReactElement, Ref } from "react";
-import type {
-	FilterOptionOption,
-	GroupBase,
-	InputActionMeta,
-	OptionsOrGroups,
-	SelectInstance,
-	Props as SelectProps,
-} from "react-select";
+import type { ReactElement, Ref, UIEvent } from "react";
+import type { SelectProps as AntdSelectProps } from "antd";
 
 export type RequestOptionsCallerType =
 	| "autoload"
 	| "menu-toggle"
 	| "input-change"
 	| "menu-scroll";
+
+export type GroupBase<OptionType> = {
+	label?: string;
+	options: readonly OptionType[];
+};
+
+export type OptionsOrGroups<
+	OptionType,
+	Group extends GroupBase<OptionType>,
+> = ReadonlyArray<OptionType | Group>;
 
 export type ReduceOptions<
 	OptionType,
@@ -74,14 +77,14 @@ export type LoadOptions<
 	| Promise<Response<OptionType, Group, Additional>>;
 
 export type FilterOption<OptionType> =
-	| ((option: FilterOptionOption<OptionType>, rawInput: string) => boolean)
-	| null;
+	| ((inputValue: string, option: OptionType | undefined) => boolean)
+	| false;
 
 export type UseAsyncPaginateBaseResult<
 	OptionType,
 	Group extends GroupBase<OptionType>,
 > = {
-	handleScrolledToBottom: () => void;
+	handlePopupScroll: (event: UIEvent<HTMLDivElement>) => void;
 	shouldLoadMore: ShouldLoadMore;
 	isLoading: boolean;
 	isFirstLoad: boolean;
@@ -95,7 +98,7 @@ export type UseAsyncPaginateResult<
 > = UseAsyncPaginateBaseResult<OptionType, Group> & {
 	inputValue: string;
 	menuIsOpen: boolean;
-	onInputChange: (inputValue: string, actionMeta: InputActionMeta) => void;
+	onInputChange: (newValue: string) => void;
 	onMenuClose: () => void;
 	onMenuOpen: () => void;
 };
@@ -135,7 +138,7 @@ export type UseAsyncPaginateParams<
 	mapOptionsForMenu?: (
 		options: OptionsOrGroups<OptionType, Group>,
 	) => OptionsOrGroups<OptionType, Group>;
-	onInputChange?: (newValue: string, actionMeta: InputActionMeta) => void;
+	onInputChange?: (newValue: string) => void;
 	onMenuClose?: () => void;
 	onMenuOpen?: () => void;
 	reloadOnErrorTimeout?: number;
@@ -150,12 +153,8 @@ export type UseAsyncPaginateBaseParams<
 	menuIsOpen: boolean;
 };
 
-export type ComponentProps<
-	OptionType,
-	Group extends GroupBase<OptionType>,
-	IsMulti extends boolean,
-> = {
-	selectRef?: Ref<SelectInstance<OptionType, IsMulti, Group>>;
+export type ComponentProps<OptionType> = {
+	selectRef?: Ref<HTMLElement>;
 	cacheUniqs?: ReadonlyArray<unknown>;
 };
 
@@ -164,9 +163,16 @@ export type AsyncPaginateProps<
 	Group extends GroupBase<OptionType>,
 	Additional,
 	IsMulti extends boolean,
-> = SelectProps<OptionType, IsMulti, Group> &
+> = Omit<
+	AntdSelectProps<OptionType>,
+	"options" | "onChange" | "filterOption" | "value"
+> &
 	UseAsyncPaginateParams<OptionType, Group, Additional> &
-	ComponentProps<OptionType, Group, IsMulti>;
+	ComponentProps<OptionType> & {
+		mode?: IsMulti extends true ? "multiple" | "tags" : undefined;
+		value?: OptionType | readonly OptionType[] | null;
+		onChange?: (value: OptionType | OptionType[] | null) => void;
+	};
 
 export type WithAsyncPaginateType = <
 	OptionType,

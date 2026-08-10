@@ -1,9 +1,9 @@
 import { getResult } from "krustykrab";
 import type { RefObject } from "react";
-import type { GroupBase } from "react-select";
 import sleep from "sleep-promise";
 import { getInitialCache } from "./getInitialCache";
 import type {
+	GroupBase,
 	OptionsCache,
 	OptionsCacheItem,
 	ReduceOptions,

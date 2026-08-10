@@ -1,4 +1,4 @@
-import type { GroupBase } from "react-select";
+import type { GroupBase } from "./types";
 import { expect, test } from "vitest";
 import { getInitialCache } from "./getInitialCache";
 import type { UseAsyncPaginateBaseParams } from "./types";

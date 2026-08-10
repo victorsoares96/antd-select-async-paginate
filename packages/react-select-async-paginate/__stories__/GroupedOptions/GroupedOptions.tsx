@@ -1,8 +1,6 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 
-import type { MultiValue } from "react-select";
-
 import sleep from "sleep-promise";
 import type { LoadOptions } from "../../src";
 import { AsyncPaginate, reduceGroupedOptions } from "../../src";
@@ -128,9 +126,7 @@ const defaultAdditional = {
 };
 
 export function GroupedOptions(props: GroupedOptionsProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 
 	const loadOptionsHandler = props?.loadOptions || wrapperdLoadOptions;
 

@@ -1,10 +1,8 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
 
-import type { GroupBase, MultiValue } from "react-select";
-
 import sleep from "sleep-promise";
-import type { LoadOptions } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
 import { AsyncPaginate } from "../../src";
 
 import type { StoryProps } from "../types";
@@ -60,9 +58,7 @@ export const loadOptions: LoadOptions<
 const increase = (numberOfRequests: number): number => numberOfRequests + 1;
 
 export function Debounce(props: DebounceProps): ReactElement {
-	const [value, onChange] = useState<
-		OptionType | MultiValue<OptionType> | null
-	>(null);
+	const [value, onChange] = useState<OptionType | OptionType[] | null>(null);
 	const [numberOfRequests, setNumberOfRequests] = useState(0);
 
 	const debounceTimeout = props?.debounceTimeout || 500;

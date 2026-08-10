@@ -1,5 +1,8 @@
-import type { GroupBase } from "react-select";
-import type { OptionsCacheItem, UseAsyncPaginateBaseParams } from "./types";
+import type {
+	GroupBase,
+	OptionsCacheItem,
+	UseAsyncPaginateBaseParams,
+} from "./types";
 
 export const getInitialCache = <
 	OptionType,

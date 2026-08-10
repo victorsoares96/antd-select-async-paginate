@@ -1,6 +1,12 @@
 import { useLazyRef } from "@vtaits/use-lazy-ref";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GroupBase } from "react-select";
+import {
+	type UIEvent,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import useIsMountedRef from "use-is-mounted-ref";
 import useLatest from "use-latest";
 import { defaultReduceOptions } from "./defaultReduceOptions";
@@ -9,6 +15,7 @@ import { getInitialCache } from "./getInitialCache";
 import { getInitialOptionsCache } from "./getInitialOptionsCache";
 import { requestOptions } from "./requestOptions";
 import type {
+	GroupBase,
 	OptionsCacheItem,
 	RequestOptionsCallerType,
 	UseAsyncPaginateBaseParams,
@@ -33,7 +40,7 @@ export const useAsyncPaginateBase = <
 		debounceTimeout = 0,
 		inputValue,
 		menuIsOpen,
-		filterOption = null,
+		filterOption = false,
 		reduceOptions = defaultReduceOptions,
 		shouldLoadMore = defaultShouldLoadMore,
 		mapOptionsForMenu = undefined,
@@ -75,14 +82,23 @@ export const useAsyncPaginateBase = <
 		},
 	);
 
-	const handleScrolledToBottom = useCallback(() => {
-		const currentInputValue = paramsRef.current.inputValue;
-		const currentOptions = optionsCacheRef.current[currentInputValue];
+	const handlePopupScroll = useCallback(
+		(event: UIEvent<HTMLDivElement>) => {
+			const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
 
-		if (currentOptions) {
-			callRequestOptionsRef.current("menu-scroll");
-		}
-	}, [callRequestOptionsRef, optionsCacheRef]);
+			if (!shouldLoadMore(scrollHeight, clientHeight, scrollTop)) {
+				return;
+			}
+
+			const currentInputValue = paramsRef.current.inputValue;
+			const currentOptions = optionsCacheRef.current[currentInputValue];
+
+			if (currentOptions) {
+				callRequestOptionsRef.current("menu-scroll");
+			}
+		},
+		[callRequestOptionsRef, optionsCacheRef, shouldLoadMore],
+	);
 
 	useEffect(() => {
 		if (isInitRef.current) {
@@ -139,7 +155,7 @@ export const useAsyncPaginateBase = <
 	}, [currentOptions.options, mapOptionsForMenu]);
 
 	return {
-		handleScrolledToBottom,
+		handlePopupScroll,
 		shouldLoadMore,
 		filterOption,
 		isLoading:
