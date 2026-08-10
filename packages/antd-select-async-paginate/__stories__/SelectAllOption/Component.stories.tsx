@@ -10,7 +10,8 @@ type Story = StoryObj<typeof SelectAllOption>;
 
 export const SelectAllOptionStory: Story = {
 	args: {
-		closeMenuOnSelect: false,
+		closeMenuOnSelect: true,
+		hideSelectedOptions: true,
 	},
 
 	name: "Select all option",

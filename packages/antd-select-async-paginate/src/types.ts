@@ -172,6 +172,27 @@ export type ComponentProps<_OptionType> = {
 	 * `isMulti` convention. Ignored if `mode` is passed explicitly.
 	 */
 	isMulti?: boolean;
+	/**
+	 * Convenience for antd's `loading` — matches react-select's `isLoading`
+	 * convention. Ignored if `loading` is passed explicitly.
+	 */
+	isLoading?: boolean;
+	/**
+	 * Force-close the popup right after any selection. antd's Select has no
+	 * native equivalent: single-select always auto-closes on select (this
+	 * can't be overridden), multi/tags-select never does. Matches
+	 * react-select's `closeMenuOnSelect` convention. `false` by default,
+	 * i.e. antd's native (unchanged) behavior.
+	 */
+	closeMenuOnSelect?: boolean;
+	/**
+	 * Hide already-selected options from the dropdown list. Compares
+	 * options against the current `value` using `fieldNames.value`
+	 * (default `"value"`, per antd's own default). Grouped options are
+	 * left untouched. Matches react-select's `hideSelectedOptions`
+	 * convention. `false` by default.
+	 */
+	hideSelectedOptions?: boolean;
 };
 
 export type AsyncPaginateProps<

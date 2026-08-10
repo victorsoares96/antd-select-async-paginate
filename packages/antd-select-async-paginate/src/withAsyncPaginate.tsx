@@ -1,6 +1,6 @@
 import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref } from "react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type {
 	AsyncPaginateProps,
 	GroupBase,
@@ -12,6 +12,15 @@ import { useAsyncPaginate } from "./useAsyncPaginate";
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
+type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
+
+const getOptionValue = (option: unknown, valueFieldName: string): unknown => {
+	if (typeof option !== "object" || option === null) {
+		return undefined;
+	}
+
+	return (option as Record<string, unknown>)[valueFieldName];
+};
 
 export function withAsyncPaginate(
 	SelectComponent: typeof AntdSelect,
@@ -26,13 +35,18 @@ export function withAsyncPaginate(
 	): ReactElement {
 		const {
 			selectRef = undefined,
-			loading: isLoadingProp,
+			loading: loadingProp,
+			isLoading: isLoadingLegacyProp,
 			cacheUniqs = defaultCacheUniqs,
 			virtual = false,
 			showSearch = true,
 			style,
 			mode,
 			isMulti,
+			closeMenuOnSelect = false,
+			hideSelectedOptions = false,
+			fieldNames,
+			value,
 			onChange,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
@@ -95,9 +109,45 @@ export function withAsyncPaginate(
 			);
 
 		const isLoading =
-			typeof isLoadingProp === "boolean"
-				? isLoadingProp
-				: asyncPaginateProps.isLoading;
+			typeof loadingProp === "boolean"
+				? loadingProp
+				: typeof isLoadingLegacyProp === "boolean"
+					? isLoadingLegacyProp
+					: asyncPaginateProps.isLoading;
+
+		const valueFieldName =
+			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
+
+		const displayedOptions = useMemo(() => {
+			if (!hideSelectedOptions) {
+				return asyncPaginateProps.options;
+			}
+
+			const valueArray = Array.isArray(value) ? value : value ? [value] : [];
+			const selectedValues = new Set(
+				valueArray.map((option) => getOptionValue(option, valueFieldName)),
+			);
+
+			return asyncPaginateProps.options.filter((option) => {
+				// grouped options are left untouched — filtering their nested
+				// options generically would also need GroupBase's own options
+				// field name, not worth the complexity for this convenience prop
+				if (
+					typeof option !== "object" ||
+					option === null ||
+					"options" in option
+				) {
+					return true;
+				}
+
+				return !selectedValues.has(getOptionValue(option, valueFieldName));
+			});
+		}, [
+			asyncPaginateProps.options,
+			hideSelectedOptions,
+			value,
+			valueFieldName,
+		]);
 
 		// antd's onChange(value, option) always gives the full option object(s)
 		// as the 2nd argument — that's what this library's value/onChange
@@ -105,14 +155,20 @@ export function withAsyncPaginate(
 		const handleChange = useCallback<AntdOnChange>(
 			(_value, option) => {
 				onChange?.(option as never);
+
+				if (closeMenuOnSelect) {
+					asyncPaginateProps.onMenuClose();
+				}
 			},
-			[onChange],
+			[onChange, closeMenuOnSelect, asyncPaginateProps.onMenuClose],
 		);
 
 		return (
 			<SelectComponent
 				{...(restSelectProps as object)}
-				options={asyncPaginateProps.options as never}
+				fieldNames={fieldNames}
+				value={value as never}
+				options={displayedOptions as never}
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
 				showSearch={showSearch}

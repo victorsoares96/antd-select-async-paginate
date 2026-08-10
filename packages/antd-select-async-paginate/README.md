@@ -114,6 +114,18 @@ Ref for the underlying antd `Select` instance.
 
 Not required. Boolean. Convenience for antd's `mode="multiple"`, matching react-select's `isMulti` convention. Ignored if `mode` is passed explicitly.
 
+### isLoading
+
+Not required. Boolean. Convenience for antd's `loading`, matching react-select's `isLoading` convention. Ignored if `loading` is passed explicitly.
+
+### closeMenuOnSelect
+
+Not required. Boolean, default `false`. Force-closes the popup right after any selection. antd's `Select` has no native equivalent: single-select always auto-closes on select (can't be overridden), multi/tags-select never does on its own. Matches react-select's `closeMenuOnSelect` convention.
+
+### hideSelectedOptions
+
+Not required. Boolean, default `false`. Hides already-selected options from the dropdown list. Compares options against the current `value` using `fieldNames.value` (default `"value"`, same as antd's own default) — works out of the box for the common `{ value, label }` option shape, or respects a custom `fieldNames` you already pass. Grouped options are left untouched. Matches react-select's `hideSelectedOptions` convention.
+
 ### selectAllOption
 
 Not required. Function `(inputValue: string) => OptionType | null`. Builds a synthetic "select all" option prepended to the menu (after `mapOptionsForMenu`), called on every render with the current search value so the option can encode it (e.g. an "All matching…" option), or return `null` to show nothing. This library has no default "select all" value shape — you own it entirely, so it's opt-in and never collides with real option values.

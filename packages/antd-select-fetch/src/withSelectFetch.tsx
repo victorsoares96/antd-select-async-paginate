@@ -4,13 +4,22 @@ import type {
 	UseAsyncPaginateResult,
 } from "antd-select-async-paginate";
 import type { ReactElement } from "react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { SelectFetchProps, SelectFetchType } from "./types";
 import { useSelectFetch } from "./useSelectFetch";
 
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
+type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
+
+const getOptionValue = (option: unknown, valueFieldName: string): unknown => {
+	if (typeof option !== "object" || option === null) {
+		return undefined;
+	}
+
+	return (option as Record<string, unknown>)[valueFieldName];
+};
 
 export function withSelectFetch(
 	SelectComponent: typeof AntdSelect,
@@ -23,12 +32,17 @@ export function withSelectFetch(
 		const {
 			selectRef = undefined,
 			cacheUniqs = defaultCacheUniqs,
-			loading: isLoadingProp,
+			loading: loadingProp,
+			isLoading: isLoadingLegacyProp,
 			virtual = false,
 			showSearch = true,
 			style,
 			mode,
 			isMulti,
+			closeMenuOnSelect = false,
+			hideSelectedOptions = false,
+			fieldNames,
+			value,
 			onChange,
 
 			// UseSelectFetchParams fields (url-fetching config + the
@@ -108,21 +122,60 @@ export function withSelectFetch(
 			);
 
 		const isLoading =
-			typeof isLoadingProp === "boolean"
-				? isLoadingProp
-				: asyncPaginateProps.isLoading;
+			typeof loadingProp === "boolean"
+				? loadingProp
+				: typeof isLoadingLegacyProp === "boolean"
+					? isLoadingLegacyProp
+					: asyncPaginateProps.isLoading;
+
+		const valueFieldName =
+			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
+
+		const displayedOptions = useMemo(() => {
+			if (!hideSelectedOptions) {
+				return asyncPaginateProps.options;
+			}
+
+			const valueArray = Array.isArray(value) ? value : value ? [value] : [];
+			const selectedValues = new Set(
+				valueArray.map((option) => getOptionValue(option, valueFieldName)),
+			);
+
+			return asyncPaginateProps.options.filter((option) => {
+				if (
+					typeof option !== "object" ||
+					option === null ||
+					"options" in option
+				) {
+					return true;
+				}
+
+				return !selectedValues.has(getOptionValue(option, valueFieldName));
+			});
+		}, [
+			asyncPaginateProps.options,
+			hideSelectedOptions,
+			value,
+			valueFieldName,
+		]);
 
 		const handleChange = useCallback<AntdOnChange>(
 			(_value, option) => {
 				onChange?.(option as never);
+
+				if (closeMenuOnSelect) {
+					asyncPaginateProps.onMenuClose();
+				}
 			},
-			[onChange],
+			[onChange, closeMenuOnSelect, asyncPaginateProps.onMenuClose],
 		);
 
 		return (
 			<SelectComponent
 				{...(restSelectProps as object)}
-				options={asyncPaginateProps.options as never}
+				fieldNames={fieldNames}
+				value={value as never}
+				options={displayedOptions as never}
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
 				showSearch={showSearch}
