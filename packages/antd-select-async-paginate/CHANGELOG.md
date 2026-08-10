@@ -1,3 +1,17 @@
+# 0.1.0
+
+Renamed from `react-select-async-paginate`. Replaced `react-select` with antd's `Select` as the underlying component. See the historical changelog for `react-select-async-paginate` at https://github.com/vtaits/react-select-async-paginate/blob/master/packages/react-select-async-paginate/CHANGELOG.md.
+
+Breaking changes versus the last `react-select-async-paginate` release:
+
+- Peer dependency is now `antd ^5` instead of `react-select ^5`.
+- `filterOption` signature changed to antd's `(inputValue, option) => boolean`, default `false` (was `null`).
+- `onInputChange` no longer receives a second `actionMeta` argument.
+- `menuPlacement`/`menuShouldScrollIntoView` removed — use antd's `placement` prop.
+- Custom option label/value field names use antd's `fieldNames` prop instead of `getOptionLabel`/`getOptionValue`.
+- `wrapMenuList`/`useComponents` removed — infinite scroll now uses antd's native `onPopupScroll`.
+- `value`/`onChange` still always carry the full option object (unchanged contract).
+
 ## 0.7.10
 
 ### Bugfix

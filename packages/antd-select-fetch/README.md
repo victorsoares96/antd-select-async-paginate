@@ -1,33 +1,25 @@
-[![NPM](https://img.shields.io/npm/v/react-select-fetch.svg)](https://www.npmjs.com/package/react-select-fetch)
-[![codecov.io](https://codecov.io/gh/vtaits/react-select-async-paginate/branch/master/graph/badge.svg)](https://codecov.io/gh/vtaits/react-select-async-paginate)
-![dependencies status](https://img.shields.io/librariesio/release/npm/react-select-fetch)
+# antd-select-fetch
 
-# react-select-fetch
+Wrapper above `antd-select-async-paginate` that loads options from specified url.
 
-Wrapper above `react-select-async-paginate` that loads options from specified url.
-
-## Sandbox examples
-
-- [Simple](https://codesandbox.io/s/9nfmg)
-- [Manual control of input value and menu opening](https://codesandbox.io/s/34pjt)
-- [Initial options](https://codesandbox.io/s/8cgpp)
+Forked from [react-select-fetch](https://github.com/vtaits/react-select-async-paginate/tree/master/packages/react-select-fetch), rebuilt on top of [antd](https://ant.design/)'s `Select` instead of `react-select`.
 
 ## Installation
 
 ```
-npm install react-select react-select-async-paginate react-select-fetch
+npm install antd antd-select-async-paginate antd-select-fetch
 ```
 
 or
 
 ```
-yarn add react-select react-select-async-paginate react-select-fetch
+yarn add antd antd-select-async-paginate antd-select-fetch
 ```
 
 or
 
 ```
-bun add react-select react-select-async-paginate react-select-fetch
+bun add antd antd-select-async-paginate antd-select-fetch
 ```
 
 ## Motivation
@@ -37,7 +29,7 @@ Abstractions are wonderful but the most common task for async select is load lis
 ```javascript
 // With SelectFetch
 
-import { SelectFetch } from 'react-select-fetch';
+import { SelectFetch } from 'antd-select-fetch';
 
 ...
 
@@ -55,7 +47,7 @@ import { SelectFetch } from 'react-select-fetch';
 ```javascript
 // Without SelectFetch
 
-import { AsyncPaginate } from 'react-select-async-paginate';
+import { AsyncPaginate } from 'antd-select-async-paginate';
 
 ...
 
@@ -82,7 +74,7 @@ import { AsyncPaginate } from 'react-select-async-paginate';
 
 ## Props
 
-`SelectFetch` receives props of `react-select` and `react-select-async-paginate`. And there are some new props:
+`SelectFetch` receives props of antd's `Select` and `antd-select-async-paginate`. And there are some new props:
 
 ### url
 
@@ -106,7 +98,7 @@ Not required. String. Name of param that contains number of loaded optons. `"off
 
 ### mapResponse
 
-Not required. Function. Mapper from server's response to format of `react-select-async-paginate`. Arguments:
+Not required. Function. Mapper from server's response to format of `antd-select-async-paginate`. Arguments:
 
   1. `response` - response of server;
 
@@ -149,46 +141,19 @@ const get = async (url, params) => {
 };
 ```
 
-## Replacing react-select component
+## Replacing antd's Select component
 
 You can use `withSelectFetch` HOC.
 
 ```javascript
-import { withSelectFetch } from 'react-select-fetch';
+import { withSelectFetch } from 'antd-select-fetch';
+import { Select } from 'antd';
 
 ...
 
-const CustomSelectFetch = withSelectFetch(CustomSelect);
+const CustomSelectFetch = withSelectFetch(Select);
 ```
 
-### typescript
+## Differences from react-select-fetch
 
-Describing type of component with extra props (example with `Creatable`):
-
-```typescript
-import type { ReactElement } from 'react';
-import type { GroupBase } from 'react-select';
-import Creatable from 'react-select/creatable';
-import type { CreatableProps } from 'react-select/creatable';
-
-import type { ComponentProps } from 'react-select-async-paginate';
-import { withSelectFetch } from 'react-select-fetch';
-import type { UseSelectFetchParams } from 'react-select-fetch';
-
-type SelectFetchCreatableProps<
-OptionType,
-Group extends GroupBase<OptionType>,
-IsMulti extends boolean,
-> =
-  & CreatableProps<OptionType, IsMulti, Group>
-  & UseSelectFetchParams<OptionType, Group>
-  & ComponentProps<OptionType, Group, IsMulti>;
-
-type SelectFetchCreatableType = <
-OptionType,
-Group extends GroupBase<OptionType>,
-IsMulti extends boolean = false,
->(props: SelectFetchCreatableProps<OptionType, Group, IsMulti>) => ReactElement;
-
-const SelectFetchCreatable = withSelectFetch(Creatable) as SelectFetchCreatableType;
-```
+See the [antd-select-async-paginate README](../antd-select-async-paginate/README.md#differences-from-react-select-async-paginate) — the same API changes (peer dependency, `filterOption`, `onInputChange`, `placement`, no `Creatable`) apply here since `SelectFetch` is built the same way as `AsyncPaginate`.

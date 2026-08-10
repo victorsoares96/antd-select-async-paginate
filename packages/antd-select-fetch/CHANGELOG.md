@@ -1,3 +1,9 @@
+# 0.1.0
+
+Renamed from `react-select-fetch`. Now built on `antd-select-async-paginate` (antd's `Select`) instead of `react-select-async-paginate` (`react-select`). See the historical changelog for `react-select-fetch` at https://github.com/vtaits/react-select-async-paginate/blob/master/packages/react-select-fetch/CHANGELOG.md.
+
+Breaking changes versus the last `react-select-fetch` release: same as `antd-select-async-paginate`'s 0.1.0 entry — peer dependency is `antd ^5` + `antd-select-async-paginate`, `filterOption`/`onInputChange`/`placement` API changes carry through since `SelectFetch` is built the same way as `AsyncPaginate`.
+
 ## 0.5.6 (06 dec 2024)
 
 ### Improvement

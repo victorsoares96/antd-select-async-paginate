@@ -1,67 +1,44 @@
-[![NPM](https://img.shields.io/npm/v/react-select-async-paginate.svg)](https://www.npmjs.com/package/react-select-async-paginate)
-[![codecov.io](https://codecov.io/gh/vtaits/react-select-async-paginate/branch/master/graph/badge.svg)](https://codecov.io/gh/vtaits/react-select-async-paginate)
-![dependencies status](https://img.shields.io/librariesio/release/npm/react-select-async-paginate)
+# antd-select-async-paginate
 
-# react-select-async-paginate
+Wrapper above antd's `Select` that supports pagination on menu scroll.
 
-Wrapper above `react-select` that supports pagination on menu scroll.
-
-## Sandbox examples
-
-- [Simple](https://codesandbox.io/s/o75rno2w65)
-- [Multi](https://codesandbox.io/s/2323yrlo9r)
-- [Creatable](https://codesandbox.io/s/5ycdz)
-- [Creatable with adding new options](https://codesandbox.io/s/6pznz)
-- [Initial options](https://codesandbox.io/s/q111nqw9j)
-- [Autoload](https://codesandbox.io/s/v8pkw)
-- [Debounce](https://codesandbox.io/s/5y2xq39v5k)
-- [Request by page number](https://codesandbox.io/s/10r1k12vk7)
-- [Customization check of the need of load options](https://codesandbox.io/s/kokz6j65zv)
-- [Grouped options](https://codesandbox.io/s/oxv62x8j4y)
-- [Custom select base](https://codesandbox.io/s/l2pjrv0ryl)
-- [Manual control of input value and menu opening](https://codesandbox.io/s/6y34j51k1n)
-- [Show selected items on top of the menu](https://codesandbox.io/p/sandbox/gpdkwk)
-- [react-hook-form integration](https://codesandbox.io/s/x7vw8c)
+Forked from [react-select-async-paginate](https://github.com/vtaits/react-select-async-paginate), rebuilt on top of [antd](https://ant.design/)'s `Select` instead of `react-select`.
 
 ## Versions
 
-| react-select | react-select-async-paginate |
-|--------------|-----------------------------|
-| 5.x | 0.6.x, 0.7.x |
-| 4.x | 0.5.x |
-| 3.x | 0.5.x, 0.4.x, ^0.3.2 |
-| 2.x | 0.3.x, 0.2.x |
-| 1.x | 0.1.x |
+| antd | antd-select-async-paginate |
+|------|------------------------------|
+| 5.x  | 0.1.x                        |
 
 ## Installation
 
 ```
-npm install react-select react-select-async-paginate
+npm install antd antd-select-async-paginate
 ```
 
 or
 
 ```
-yarn add react-select react-select-async-paginate
+yarn add antd antd-select-async-paginate
 ```
 
 or
 
 ```
-bun add react-select react-select-async-paginate
+bun add antd antd-select-async-paginate
 ```
 
 ## Usage
 
-`AsyncPaginate` is an alternative of `Async` but supports loading page by page. It is wrapper above default `react-select` thus it accepts all props of default `Select`. And there are some new props:
+`AsyncPaginate` is a wrapper above antd's `Select` that supports loading options page by page. It accepts all props of antd's `Select`, plus some new ones:
 
 ### loadOptions
 
-Required. Async function that take next arguments:
+Required. Async function that takes the next arguments:
 
 1. Current value of search input.
 2. Loaded options for current search.
-3. Collected additional data e.g. current page number etc. For first load it is `additional` from props, for next is `additional` from previous response for current search. `null` by default.
+3. Collected additional data e.g. current page number etc. For first load it is `additional` from props, for next is `additional` from previous response for current search. `undefined` by default.
 
 It should return next object:
 
@@ -72,13 +49,6 @@ It should return next object:
   additional?: any,
 }
 ```
-
-It similar to `loadOptions` from `Select.Async` but there is some differences:
-
-1. Loaded options as 2nd argument.
-2. Additional data as 3nd argument.
-3. Not supports callback.
-4. Should return `hasMore` for detect end of options list for current search.
 
 ### debounceTimeout
 
@@ -94,7 +64,7 @@ Not required. Default `additional` for empty search if `options` or `defaultOpti
 
 ### shouldLoadMore
 
-Not required. Function. By default new options will load only after scroll menu to bottom. Arguments:
+Not required. Function. By default new options will load only after scrolling the popup to the bottom. Arguments:
 
 - scrollHeight
 - clientHeight
@@ -104,7 +74,7 @@ Should return boolean.
 
 ### reduceOptions
 
-Not required. Function. By default new loaded options are concat with previous. Arguments:
+Not required. Function. By default new loaded options are concatenated with the previous ones. Arguments:
 
 - previous options
 - loaded options
@@ -114,15 +84,15 @@ Should return new options.
 
 ### reloadOnErrorTimeout
 
-Not required. Number. Time in milliseconds to retry a request after an error
+Not required. Number. Time in milliseconds to retry a request after an error.
 
 ### clearCacheOnSearchChange
 
-Not required. Boolean. Clear all cached options on search change
+Not required. Boolean. Clear all cached options on search change.
 
 ### clearCacheOnMenuClose
 
-Not required. Boolean. Clear all cached options on menu close
+Not required. Boolean. Clear all cached options on menu close.
 
 ### cacheUniqs
 
@@ -138,14 +108,27 @@ Not required. Function. Post-mapping of loaded options to display them in the me
 
 ### selectRef
 
-Ref for take `react-select` instance.
+Ref for the underlying antd `Select` instance.
+
+## Differences from react-select-async-paginate
+
+If you're migrating from `react-select-async-paginate`:
+
+- Peer dependency is `antd ^5` instead of `react-select ^5`.
+- Infinite scroll uses antd's native `onPopupScroll` — no more `wrapMenuList`/`useComponents` `MenuList`-wrapping workaround.
+- `filterOption` follows antd's signature: `(inputValue, option) => boolean`, defaults to `false` (no client-side filtering, since search is expected to be driven by `loadOptions`). Antd's grouped options and custom label/value field names are configured via the `fieldNames` prop instead of `getOptionLabel`/`getOptionValue`.
+- `onInputChange` no longer receives a second `actionMeta` argument (antd's `onSearch` only gives the new value).
+- `menuPlacement`/`menuShouldScrollIntoView` are gone — use antd's `placement` prop.
+- `value`/`onChange` still always carry the full option object (single) or array of full option objects (multi) — this contract is unchanged from `react-select-async-paginate`, implemented internally by reading the 2nd argument of antd's `onChange(value, option)`.
+- Virtual scrolling (antd's `virtual` prop) defaults to `false`, to keep every loaded option present in the DOM the way `react-select` always did. Pass `virtual` explicitly to opt back in.
+- antd has no `Creatable` select — see the `Creatable`/`CreatableWithNewOptions` stories in `__stories__` for a DIY pattern using `notFoundContent`.
 
 ## Example
 
 ### offset way
 
 ```javascript
-import { AsyncPaginate } from 'react-select-async-paginate';
+import { AsyncPaginate } from 'antd-select-async-paginate';
 
 ...
 
@@ -190,7 +173,7 @@ async function loadOptions(search, loadedOptions) {
 ### page way
 
 ```javascript
-import { AsyncPaginate } from 'react-select-async-paginate';
+import { AsyncPaginate } from 'antd-select-async-paginate';
 
 ...
 
@@ -222,7 +205,7 @@ async function loadOptions(search, loadedOptions, { page }) {
 You can use `reduceGroupedOptions` util to group options by `label` key.
 
 ```javascript
-import { AsyncPaginate, reduceGroupedOptions } from 'react-select-async-paginate';
+import { AsyncPaginate, reduceGroupedOptions } from 'antd-select-async-paginate';
 
 /*
  * assuming the API returns something like this:
@@ -256,87 +239,29 @@ import { AsyncPaginate, reduceGroupedOptions } from 'react-select-async-paginate
 />
 ```
 
-## Replacing react-select component
+## Replacing antd's Select component
 
-You can use `withAsyncPaginate` HOC.
+You can use `withAsyncPaginate` HOC to build a pagination-aware wrapper around any antd-`Select`-compatible component.
 
 ```javascript
-import { withAsyncPaginate } from 'react-select-async-paginate';
+import { withAsyncPaginate } from 'antd-select-async-paginate';
+import { Select } from 'antd';
 
 ...
 
-const CustomAsyncPaginate = withAsyncPaginate(CustomSelect);
-```
-
-### typescript
-
-Describing type of component with extra props (example with `Creatable`):
-
-```typescript
-import type { ReactElement } from 'react';
-import type { GroupBase } from 'react-select';
-import Creatable from 'react-select/creatable';
-import type { CreatableProps } from 'react-select/creatable';
-
-import { withAsyncPaginate } from 'react-select-async-paginate';
-import type {
-  UseAsyncPaginateParams,
-  ComponentProps,
-} from 'react-select-async-paginate';
-
-type AsyncPaginateCreatableProps<
-OptionType,
-Group extends GroupBase<OptionType>,
-Additional,
-IsMulti extends boolean,
-> =
-  & CreatableProps<OptionType, IsMulti, Group>
-  & UseAsyncPaginateParams<OptionType, Group, Additional>
-  & ComponentProps<OptionType, Group, IsMulti>;
-
-type AsyncPaginateCreatableType = <
-OptionType,
-Group extends GroupBase<OptionType>,
-Additional,
-IsMulti extends boolean = false,
->(props: AsyncPaginateCreatableProps<OptionType, Group, Additional, IsMulti>) => ReactElement;
-
-const AsyncPaginateCreatable = withAsyncPaginate(Creatable) as AsyncPaginateCreatableType;
-```
-
-## Replacing Components
-
-Component replacing is done similar to how its done with `react-select`, but with one difference: if you redefine `MenuList` you should wrap it with `wrapMenuList` to workaround some internal `react-select` bugs.
-
-```javascript
-import { AsyncPaginate, wrapMenuList } from 'react-select-async-paginate';
-
-...
-
-const MenuList = wrapMenuList(CustomMenuList);
-
-<AsyncPaginate
-  {...otherProps}
-  components={{
-    ...otherComponents,
-    MenuList,
-  }}
-/>
+const CustomAsyncPaginate = withAsyncPaginate(Select);
 ```
 
 ## Extended usage
 
-If you want construct own component that uses logic of `react-select-async-paginate` inside, you can use next hooks:
+If you want to construct your own component that uses the logic of `antd-select-async-paginate` inside, you can use next hooks:
 
 - `useAsyncPaginate`
 - `useAsyncPaginateBase`
-- `useComponents`
 
 ```javascript
-import {
-  useAsyncPaginate,
-  useComponents,
-} from 'react-select-async-paginate';
+import { Select } from 'antd';
+import { useAsyncPaginate } from 'antd-select-async-paginate';
 
 ...
 
@@ -349,8 +274,6 @@ const CustomAsyncPaginateComponent = ({
   filterOption,
   reduceOptions,
   shouldLoadMore,
-
-  components: defaultComponents,
 
   value,
   onChange,
@@ -366,17 +289,19 @@ const CustomAsyncPaginateComponent = ({
     shouldLoadMore,
   });
 
-  const components = useComponents(defaultComponents);
-
   return (
-    <CustomSelect
-      {...asyncPaginateProps}
-      components={components}
+    <Select
+      options={asyncPaginateProps.options}
+      searchValue={asyncPaginateProps.inputValue}
+      onSearch={asyncPaginateProps.onInputChange}
+      open={asyncPaginateProps.menuIsOpen}
+      onOpenChange={(open) => (open ? asyncPaginateProps.onMenuOpen() : asyncPaginateProps.onMenuClose())}
+      onPopupScroll={asyncPaginateProps.handlePopupScroll}
+      filterOption={asyncPaginateProps.filterOption}
+      loading={asyncPaginateProps.isLoading}
       value={value}
-      onChange={onChange}
+      onChange={(_value, option) => onChange(option)}
     />
   );
 }
 ```
-
-`useComponents` provides redefined `MenuList` component by default. If you want redefine it, you should also wrap in with `wrapMenuList`.
