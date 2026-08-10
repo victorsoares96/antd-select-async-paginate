@@ -29,12 +29,66 @@ export function withAsyncPaginate(
 			loading: isLoadingProp,
 			cacheUniqs = defaultCacheUniqs,
 			virtual = false,
+			showSearch = true,
+			style,
 			onChange,
-			...rest
+
+			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
+			// stripped out here so they never leak into `restSelectProps` and
+			// get spread onto antd's Select (which forwards unknown props to
+			// the underlying DOM node).
+			clearCacheOnSearchChange,
+			clearCacheOnMenuClose,
+			loadOptions,
+			options,
+			defaultOptions,
+			additional,
+			defaultAdditional,
+			loadOptionsOnMenuOpen,
+			debounceTimeout,
+			reduceOptions,
+			shouldLoadMore,
+			filterOption,
+			inputValue,
+			menuIsOpen,
+			defaultInputValue,
+			defaultMenuIsOpen,
+			mapOptionsForMenu,
+			onInputChange,
+			onMenuClose,
+			onMenuOpen,
+			reloadOnErrorTimeout,
+
+			...restSelectProps
 		} = props;
 
 		const asyncPaginateProps: UseAsyncPaginateResult<OptionType, Group> =
-			useAsyncPaginate(rest, cacheUniqs);
+			useAsyncPaginate(
+				{
+					clearCacheOnSearchChange,
+					clearCacheOnMenuClose,
+					loadOptions,
+					options,
+					defaultOptions,
+					additional,
+					defaultAdditional,
+					loadOptionsOnMenuOpen,
+					debounceTimeout,
+					reduceOptions,
+					shouldLoadMore,
+					filterOption,
+					inputValue,
+					menuIsOpen,
+					defaultInputValue,
+					defaultMenuIsOpen,
+					mapOptionsForMenu,
+					onInputChange,
+					onMenuClose,
+					onMenuOpen,
+					reloadOnErrorTimeout,
+				},
+				cacheUniqs,
+			);
 
 		const isLoading =
 			typeof isLoadingProp === "boolean"
@@ -53,10 +107,12 @@ export function withAsyncPaginate(
 
 		return (
 			<SelectComponent
-				{...(rest as object)}
+				{...(restSelectProps as object)}
 				options={asyncPaginateProps.options as never}
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
+				showSearch={showSearch}
+				style={{ width: "100%", ...style }}
 				open={asyncPaginateProps.menuIsOpen}
 				onOpenChange={(open) => {
 					if (open) {

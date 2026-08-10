@@ -25,12 +25,83 @@ export function withSelectFetch(
 			cacheUniqs = defaultCacheUniqs,
 			loading: isLoadingProp,
 			virtual = false,
+			showSearch = true,
+			style,
 			onChange,
-			...rest
+
+			// UseSelectFetchParams fields (url-fetching config + the
+			// UseAsyncPaginateParams fields it wraps) consumed by
+			// useSelectFetch below — stripped out here so they never leak
+			// into `restSelectProps` and get spread onto antd's Select
+			// (which forwards unknown props to the underlying DOM node).
+			url,
+			queryParams,
+			searchParamName,
+			pageParamName,
+			offsetParamName,
+			mapResponse,
+			get,
+			initialPage,
+			defaultInitialPage,
+			clearCacheOnSearchChange,
+			clearCacheOnMenuClose,
+			options,
+			defaultOptions,
+			additional,
+			defaultAdditional,
+			loadOptionsOnMenuOpen,
+			debounceTimeout,
+			reduceOptions,
+			shouldLoadMore,
+			filterOption,
+			inputValue,
+			menuIsOpen,
+			defaultInputValue,
+			defaultMenuIsOpen,
+			mapOptionsForMenu,
+			onInputChange,
+			onMenuClose,
+			onMenuOpen,
+			reloadOnErrorTimeout,
+
+			...restSelectProps
 		} = props;
 
 		const asyncPaginateProps: UseAsyncPaginateResult<OptionType, Group> =
-			useSelectFetch(rest, cacheUniqs);
+			useSelectFetch(
+				{
+					url,
+					queryParams,
+					searchParamName,
+					pageParamName,
+					offsetParamName,
+					mapResponse,
+					get,
+					initialPage,
+					defaultInitialPage,
+					clearCacheOnSearchChange,
+					clearCacheOnMenuClose,
+					options,
+					defaultOptions,
+					additional,
+					defaultAdditional,
+					loadOptionsOnMenuOpen,
+					debounceTimeout,
+					reduceOptions,
+					shouldLoadMore,
+					filterOption,
+					inputValue,
+					menuIsOpen,
+					defaultInputValue,
+					defaultMenuIsOpen,
+					mapOptionsForMenu,
+					onInputChange,
+					onMenuClose,
+					onMenuOpen,
+					reloadOnErrorTimeout,
+				},
+				cacheUniqs,
+			);
 
 		const isLoading =
 			typeof isLoadingProp === "boolean"
@@ -46,10 +117,12 @@ export function withSelectFetch(
 
 		return (
 			<SelectComponent
-				{...(rest as object)}
+				{...(restSelectProps as object)}
 				options={asyncPaginateProps.options as never}
 				searchValue={asyncPaginateProps.inputValue}
 				onSearch={asyncPaginateProps.onInputChange}
+				showSearch={showSearch}
+				style={{ width: "100%", ...style }}
 				open={asyncPaginateProps.menuIsOpen}
 				onOpenChange={(open) => {
 					if (open) {

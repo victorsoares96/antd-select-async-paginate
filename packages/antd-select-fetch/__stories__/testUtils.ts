@@ -40,8 +40,17 @@ export async function clearText(screen: RenderResult) {
 export async function scroll(screen: RenderResult, position: number) {
 	const menu = unwrap(getMenu(screen).query()) as HTMLElement;
 
-	menu.scrollTop = position;
-	menu.dispatchEvent(new Event("scroll", { bubbles: true }));
+	// [role="listbox"] is rc-virtual-list's inner content wrapper — it
+	// doesn't scroll itself. The actual overflow:auto scroll container is
+	// `.rc-virtual-list-holder`, a couple of ancestors up, and that's what
+	// antd's onPopupScroll actually listens on.
+	const scrollContainer =
+		(menu
+			.closest(".rc-virtual-list")
+			?.querySelector(".rc-virtual-list-holder") as HTMLElement | null) ?? menu;
+
+	scrollContainer.scrollTop = position;
+	scrollContainer.dispatchEvent(new Event("scroll", { bubbles: true }));
 }
 
 export function getAllOptions(screen: RenderResult) {
