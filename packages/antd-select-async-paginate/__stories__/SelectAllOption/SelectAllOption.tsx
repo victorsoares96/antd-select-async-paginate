@@ -3,7 +3,11 @@ import { useCallback, useState } from "react";
 
 import sleep from "sleep-promise";
 import type { GroupBase, LoadOptions } from "../../src";
-import { AsyncPaginate, resolveSelectAllChange } from "../../src";
+import {
+	AsyncPaginate,
+	createSelectAllOption,
+	resolveSelectAllChange,
+} from "../../src";
 
 import type { StoryProps } from "../types";
 
@@ -54,22 +58,11 @@ export const loadOptions: LoadOptions<
 	};
 };
 
-// "__all__" (no search) or "__all__:<search>" (search active) — both are
-// select-all sentinels, the suffix is only there for the app to know which
-// filter was active when the user picked it.
-export const isSelectAllOption = (option: OptionType): boolean =>
-	option.value.startsWith("__all__");
-
-export function buildSelectAllOption(inputValue: string): OptionType {
-	if (!inputValue) {
-		return { value: "__all__", label: "Todos" };
-	}
-
-	return {
-		value: `__all__:${inputValue}`,
-		label: `Todos com o termo: "${inputValue}"`,
-	};
-}
+export const selectAllOption = createSelectAllOption({
+	value: "__all__",
+	label: "Todos",
+	searchLabel: (search) => `Todos com o termo: "${search}"`,
+});
 
 export function SelectAllOption(
 	props: SelectAllOptionStoryProps,
@@ -86,7 +79,13 @@ export function SelectAllOption(
 					? [nextValue]
 					: [];
 
-			setValue(resolveSelectAllChange(value, nextArray, isSelectAllOption));
+			setValue(
+				resolveSelectAllChange(
+					value,
+					nextArray,
+					selectAllOption.isSelectAllOption,
+				),
+			);
 		},
 		[value],
 	);
@@ -102,7 +101,7 @@ export function SelectAllOption(
 				mode="multiple"
 				value={value}
 				loadOptions={loadOptionsHandler}
-				selectAllOption={buildSelectAllOption}
+				selectAllOption={selectAllOption}
 				onChange={handleChange}
 			/>
 

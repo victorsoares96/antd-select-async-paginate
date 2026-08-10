@@ -142,6 +142,31 @@ const selectAllOption = (inputValue) =>
 />
 ```
 
+For the common `{ value, label }` option shape, `createSelectAllOption` builds `selectAllOption` (and a matching `isSelectAllOption`) for you, so you only need to customize the two labels (and optionally the base `value`):
+
+```javascript
+import { AsyncPaginate, createSelectAllOption, resolveSelectAllChange } from 'antd-select-async-paginate';
+
+const selectAllOption = createSelectAllOption({
+  value: '__all__',
+  label: 'All',
+  searchLabel: (search) => `All matching "${search}"`,
+});
+
+<AsyncPaginate
+  mode="multiple"
+  value={value}
+  loadOptions={loadOptions}
+  selectAllOption={selectAllOption}
+  onChange={(nextValue) => {
+    const nextArray = Array.isArray(nextValue) ? nextValue : nextValue ? [nextValue] : [];
+    setValue(resolveSelectAllChange(value, nextArray, selectAllOption.isSelectAllOption));
+  }}
+/>
+```
+
+For any other `OptionType` shape, write `selectAllOption`/`isSelectAllOption` by hand as shown above.
+
 See the `Select all option` story in `__stories__` for a complete example.
 
 ## Differences from react-select-async-paginate

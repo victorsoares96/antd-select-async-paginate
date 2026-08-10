@@ -8,6 +8,10 @@ const isSelectAllOption = (option: OptionType) => option.value === "__all__";
 const optionA: OptionType = { value: "a", label: "A" };
 const optionB: OptionType = { value: "b", label: "B" };
 const allOption: OptionType = { value: "__all__", label: "Todos" };
+const allWithSearchOption: OptionType = {
+	value: "__all__:x",
+	label: 'Todos com o termo: "x"',
+};
 
 describe("resolveSelectAllChange", () => {
 	test("selecting the select-all option drops every other selected option", () => {
@@ -48,5 +52,30 @@ describe("resolveSelectAllChange", () => {
 		);
 
 		expect(result).toEqual([optionA, optionB]);
+	});
+
+	test("switching from one select-all variant to another replaces it, not clears it", () => {
+		const result = resolveSelectAllChange(
+			[allOption],
+			[allOption, allWithSearchOption],
+			isSelectAllOption,
+		);
+
+		expect(result).toEqual([allWithSearchOption]);
+	});
+
+	test("switching select-all variants still works when antd rebuilds the previous option as a new object reference", () => {
+		// antd/rc-select rebuilds each value's option object from its current
+		// `options` list rather than reusing the object reference originally
+		// passed in via `value` — this must not be relied on.
+		const rebuiltAllOption: OptionType = { ...allOption };
+
+		const result = resolveSelectAllChange(
+			[allOption],
+			[rebuiltAllOption, allWithSearchOption],
+			isSelectAllOption,
+		);
+
+		expect(result).toEqual([allWithSearchOption]);
 	});
 });

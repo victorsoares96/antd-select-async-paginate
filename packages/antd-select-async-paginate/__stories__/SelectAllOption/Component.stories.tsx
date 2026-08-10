@@ -9,6 +9,10 @@ export default meta;
 type Story = StoryObj<typeof SelectAllOption>;
 
 export const SelectAllOptionStory: Story = {
+	args: {
+		closeMenuOnSelect: false,
+	},
+
 	name: "Select all option",
 	render: (props) => <SelectAllOption {...props} />,
 };
