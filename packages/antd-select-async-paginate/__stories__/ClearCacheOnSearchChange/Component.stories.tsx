@@ -4,7 +4,7 @@ import { ClearCacheOnSearchChange } from "./ClearCacheOnSearchChange";
 import rawSource from "./ClearCacheOnSearchChange.tsx?raw";
 
 const meta: Meta<typeof ClearCacheOnSearchChange> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: ClearCacheOnSearchChange,
 };
 export default meta;

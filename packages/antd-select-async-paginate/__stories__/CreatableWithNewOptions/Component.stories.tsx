@@ -4,7 +4,7 @@ import { CreatableWithNewOptions } from "./CreatableWithNewOptions";
 import rawSource from "./CreatableWithNewOptions.tsx?raw";
 
 const meta: Meta<typeof CreatableWithNewOptions> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: CreatableWithNewOptions,
 };
 export default meta;

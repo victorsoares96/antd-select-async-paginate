@@ -4,7 +4,7 @@ import { CustomScrollCheck } from "./CustomScrollCheck";
 import rawSource from "./CustomScrollCheck.tsx?raw";
 
 const meta: Meta<typeof CustomScrollCheck> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: CustomScrollCheck,
 };
 export default meta;

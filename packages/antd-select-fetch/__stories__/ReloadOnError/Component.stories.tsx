@@ -4,7 +4,7 @@ import { ReloadOnError } from "./ReloadOnError";
 import rawSource from "./ReloadOnError.tsx?raw";
 
 const meta: Meta<typeof ReloadOnError> = {
-	title: "react-select-fetch",
+	title: "antd-select-fetch",
 	component: ReloadOnError,
 };
 export default meta;

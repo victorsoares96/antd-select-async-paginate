@@ -4,7 +4,7 @@ import { Autoload } from "./Autoload";
 import rawSource from "./Autoload.tsx?raw";
 
 const meta: Meta<typeof Autoload> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: Autoload,
 };
 export default meta;

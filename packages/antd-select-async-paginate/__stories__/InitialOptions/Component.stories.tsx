@@ -4,7 +4,7 @@ import { InitialOptions } from "./InitialOptions";
 import rawSource from "./InitialOptions.tsx?raw";
 
 const meta: Meta<typeof InitialOptions> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: InitialOptions,
 };
 export default meta;

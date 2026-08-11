@@ -4,7 +4,7 @@ import { ReloadOnError } from "./ReloadOnError";
 import rawSource from "./ReloadOnError.tsx?raw";
 
 const meta: Meta<typeof ReloadOnError> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: ReloadOnError,
 };
 export default meta;

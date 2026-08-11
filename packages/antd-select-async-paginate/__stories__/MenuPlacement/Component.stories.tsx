@@ -4,7 +4,7 @@ import { MenuPlacement } from "./MenuPlacement";
 import rawSource from "./MenuPlacement.tsx?raw";
 
 const meta: Meta<typeof MenuPlacement> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: MenuPlacement,
 };
 export default meta;

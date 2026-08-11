@@ -4,7 +4,7 @@ import { PreventLoadOnMenuOpen } from "./PreventLoadOnMenuOpen";
 import rawSource from "./PreventLoadOnMenuOpen.tsx?raw";
 
 const meta: Meta<typeof PreventLoadOnMenuOpen> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: PreventLoadOnMenuOpen,
 };
 export default meta;

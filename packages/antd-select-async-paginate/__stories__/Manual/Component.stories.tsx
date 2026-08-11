@@ -4,7 +4,7 @@ import { Manual } from "./Manual";
 import rawSource from "./Manual.tsx?raw";
 
 const meta: Meta<typeof Manual> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: Manual,
 };
 export default meta;

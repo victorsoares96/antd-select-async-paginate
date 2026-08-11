@@ -4,7 +4,7 @@ import { Simple } from "./Simple";
 import rawSource from "./Simple.tsx?raw";
 
 const meta: Meta<typeof Simple> = {
-	title: "react-select-fetch",
+	title: "antd-select-fetch",
 	component: Simple,
 };
 export default meta;

@@ -4,7 +4,7 @@ import { HighlightSearchTerm } from "./HighlightSearchTerm";
 import rawSource from "./HighlightSearchTerm.tsx?raw";
 
 const meta: Meta<typeof HighlightSearchTerm> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: HighlightSearchTerm,
 };
 export default meta;

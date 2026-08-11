@@ -4,7 +4,7 @@ import { RequestByPageNumber } from "./RequestByPageNumber";
 import rawSource from "./RequestByPageNumber.tsx?raw";
 
 const meta: Meta<typeof RequestByPageNumber> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: RequestByPageNumber,
 };
 export default meta;

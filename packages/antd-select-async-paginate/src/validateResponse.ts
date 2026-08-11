@@ -1,7 +1,7 @@
 import type { GroupBase, Response } from "./types";
 
 export const errorText =
-	'[react-select-async-paginate] response of "loadOptions" should be an object with "options" prop, which contains array of options.';
+	'[antd-select-async-paginate] response of "loadOptions" should be an object with "options" prop, which contains array of options.';
 
 export const checkIsResponse = <
 	OptionType,

@@ -4,7 +4,7 @@ import { ResponsiveTags } from "./ResponsiveTags";
 import rawSource from "./ResponsiveTags.tsx?raw";
 
 const meta: Meta<typeof ResponsiveTags> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: ResponsiveTags,
 };
 export default meta;

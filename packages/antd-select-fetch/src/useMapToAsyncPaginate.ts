@@ -9,7 +9,7 @@ import { get as defaultGet } from "./get";
 import type { Additional, UseSelectFetchMapParams } from "./types";
 
 export const errorText =
-	'[react-select-fetch] response should be an object with "options" prop, which contains array of options. Also you can use `mapResponse` param';
+	'[antd-select-fetch] response should be an object with "options" prop, which contains array of options. Also you can use `mapResponse` param';
 
 export const defaultResponseMapper = <
 	OptionType,

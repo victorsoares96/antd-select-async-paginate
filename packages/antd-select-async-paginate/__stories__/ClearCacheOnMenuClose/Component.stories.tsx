@@ -4,7 +4,7 @@ import { ClearCacheOnMenuClose } from "./ClearCacheOnMenuClose";
 import rawSource from "./ClearCacheOnMenuClose.tsx?raw";
 
 const meta: Meta<typeof ClearCacheOnMenuClose> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: ClearCacheOnMenuClose,
 };
 export default meta;

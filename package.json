@@ -4,8 +4,8 @@
   "workspaces": [
     "packages/*"
   ],
-  "repository": "git@github.com:vtaits/react-select-async-paginate.git",
-  "author": "Vadim Taits",
+  "repository": "git@github.com:victorsoares96/antd-select-async-paginate.git",
+  "author": "Victor Soares",
   "license": "MIT",
   "scripts": {
     "start": "storybook dev -p 6006",

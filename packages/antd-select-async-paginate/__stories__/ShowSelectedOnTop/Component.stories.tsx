@@ -4,7 +4,7 @@ import { ShowSelectedOnTop } from "./ShowSelectedOnTop";
 import rawSource from "./ShowSelectedOnTop.tsx?raw";
 
 const meta: Meta<typeof ShowSelectedOnTop> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: ShowSelectedOnTop,
 };
 export default meta;

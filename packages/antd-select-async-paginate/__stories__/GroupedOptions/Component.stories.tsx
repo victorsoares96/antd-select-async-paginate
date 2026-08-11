@@ -4,7 +4,7 @@ import { GroupedOptions } from "./GroupedOptions";
 import rawSource from "./GroupedOptions.tsx?raw";
 
 const meta: Meta<typeof GroupedOptions> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: GroupedOptions,
 };
 export default meta;

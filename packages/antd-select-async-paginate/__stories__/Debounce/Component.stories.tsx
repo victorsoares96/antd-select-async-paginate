@@ -4,7 +4,7 @@ import { Debounce } from "./Debounce";
 import rawSource from "./Debounce.tsx?raw";
 
 const meta: Meta<typeof Debounce> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: Debounce,
 };
 export default meta;

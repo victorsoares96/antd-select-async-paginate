@@ -4,7 +4,7 @@ import { CreatableWithNewOptions } from "./CreatableWithNewOptions";
 import rawSource from "./CreatableWithNewOptions.tsx?raw";
 
 const meta: Meta<typeof CreatableWithNewOptions> = {
-	title: "react-select-fetch",
+	title: "antd-select-fetch",
 	component: CreatableWithNewOptions,
 };
 export default meta;

@@ -4,7 +4,7 @@ import { SelectAllOption } from "./SelectAllOption";
 import rawSource from "./SelectAllOption.tsx?raw";
 
 const meta: Meta<typeof SelectAllOption> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: SelectAllOption,
 };
 export default meta;

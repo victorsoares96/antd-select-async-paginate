@@ -4,7 +4,7 @@ import { Simple } from "./Simple";
 import rawSource from "./Simple.tsx?raw";
 
 const meta: Meta<typeof Simple> = {
-	title: "react-select-async-paginate",
+	title: "antd-select-async-paginate",
 	component: Simple,
 };
 export default meta;
