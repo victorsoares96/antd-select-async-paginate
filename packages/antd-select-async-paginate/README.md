@@ -126,6 +126,33 @@ Not required. Boolean, default `false`. Force-closes the popup right after any s
 
 Not required. Boolean, default `false`. Hides already-selected options from the dropdown list. Implemented with a scoped CSS rule rather than removing them from `options` — removing a selected option from `options` breaks rc-select's ability to rebuild that option's full data (label, extra fields) the next time any option is picked, degrading it to an incomplete object. Matches react-select's `hideSelectedOptions` convention.
 
+### highlightSearchTerm
+
+Not required. `boolean | { className?: string; style?: CSSProperties }`, default `false`. Wraps the matched search term inside each option's label in a `<mark>` element, using antd's native `optionRender`. Pass an object to customize the wrapper's `className`/`style` instead of the default yellow highlight (`#ffe58f`). Ignored if `optionRender` is passed explicitly (your renderer always wins).
+
+Unlike a plain `optionRender`, this doesn't require you to control `inputValue` yourself — the library already knows the current search value internally.
+
+```javascript
+import { AsyncPaginate } from 'antd-select-async-paginate';
+
+<AsyncPaginate
+  highlightSearchTerm
+  loadOptions={loadOptions}
+  value={value}
+  onChange={setValue}
+/>
+
+// or with a custom color:
+<AsyncPaginate
+  highlightSearchTerm={{ style: { backgroundColor: '#b7eb8f', padding: '0 2px' } }}
+  loadOptions={loadOptions}
+  value={value}
+  onChange={setValue}
+/>
+```
+
+The underlying `highlightText(text, searchTerm, options?)` function is also exported standalone, for use inside your own `optionRender`.
+
 ### selectAllOption
 
 Not required. Function `(inputValue: string) => OptionType | null`. Builds a synthetic "select all" option prepended to the menu (after `mapOptionsForMenu`), called on every render with the current search value so the option can encode it (e.g. an "All matching…" option), or return `null` to show nothing. This library has no default "select all" value shape — you own it entirely, so it's opt-in and never collides with real option values.

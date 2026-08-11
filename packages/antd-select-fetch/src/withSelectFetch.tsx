@@ -1,7 +1,8 @@
 import type { Select as AntdSelect, GetProp } from "antd";
-import type {
-	GroupBase,
-	UseAsyncPaginateResult,
+import {
+	type GroupBase,
+	highlightText,
+	type UseAsyncPaginateResult,
 } from "antd-select-async-paginate";
 import type { ReactElement } from "react";
 import { useCallback, useRef } from "react";
@@ -11,6 +12,8 @@ import { useSelectFetch } from "./useSelectFetch";
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
+type AntdOptionRender = GetProp<typeof AntdSelect, "optionRender">;
+type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 
 let hideSelectedOptionsUniqCounter = 0;
 
@@ -34,7 +37,10 @@ export function withSelectFetch(
 			isMulti,
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
+			highlightSearchTerm = false,
 			popupClassName,
+			optionRender,
+			fieldNames,
 			onChange,
 
 			// UseSelectFetchParams fields (url-fetching config + the
@@ -130,6 +136,32 @@ export function withSelectFetch(
 			hideSelectedOptionsClassNameRef.current = `async-paginate-hide-selected-options-${hideSelectedOptionsUniqCounter}`;
 		}
 
+		const labelFieldName =
+			(fieldNames as AntdFieldNames | undefined)?.label ?? "label";
+
+		const highlightOptions =
+			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;
+
+		const resolvedOptionRender: AntdOptionRender | undefined =
+			optionRender ??
+			(highlightOptions
+				? (option) => {
+						const label = (option.data as Record<string, unknown>)[
+							labelFieldName
+						];
+
+						if (typeof label !== "string") {
+							return option.label;
+						}
+
+						return highlightText(
+							label,
+							asyncPaginateProps.inputValue,
+							highlightOptions,
+						);
+					}
+				: undefined);
+
 		const handleChange = useCallback<AntdOnChange>(
 			(_value, option) => {
 				onChange?.(option as never);
@@ -157,6 +189,8 @@ export function withSelectFetch(
 									.join(" ")
 							: popupClassName
 					}
+					fieldNames={fieldNames}
+					optionRender={resolvedOptionRender}
 					options={asyncPaginateProps.options as never}
 					searchValue={asyncPaginateProps.inputValue}
 					onSearch={asyncPaginateProps.onInputChange}

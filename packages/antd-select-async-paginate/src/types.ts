@@ -1,5 +1,6 @@
 import type { SelectProps as AntdSelectProps } from "antd";
 import type { ReactElement, Ref, UIEvent } from "react";
+import type { HighlightTextOptions } from "./highlightText";
 
 export type RequestOptionsCallerType =
 	| "autoload"
@@ -194,6 +195,13 @@ export type ComponentProps<_OptionType> = {
 	 * convention. `false` by default.
 	 */
 	hideSelectedOptions?: boolean;
+	/**
+	 * Highlight the matched search term inside each option's label, using
+	 * antd's `optionRender`. Pass an object to customize the `<mark>`
+	 * wrapper's `className`/`style` instead of the default yellow
+	 * highlight. Ignored if `optionRender` is passed explicitly.
+	 */
+	highlightSearchTerm?: boolean | HighlightTextOptions;
 };
 
 export type AsyncPaginateProps<

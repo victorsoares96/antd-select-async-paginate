@@ -1,6 +1,7 @@
 import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref } from "react";
 import { useCallback, useRef } from "react";
+import { highlightText } from "./highlightText";
 import type {
 	AsyncPaginateProps,
 	GroupBase,
@@ -12,6 +13,8 @@ import { useAsyncPaginate } from "./useAsyncPaginate";
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
+type AntdOptionRender = GetProp<typeof AntdSelect, "optionRender">;
+type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 
 let hideSelectedOptionsUniqCounter = 0;
 
@@ -38,7 +41,10 @@ export function withAsyncPaginate(
 			isMulti,
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
+			highlightSearchTerm = false,
 			popupClassName,
+			optionRender,
+			fieldNames,
 			onChange,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
@@ -121,6 +127,32 @@ export function withAsyncPaginate(
 			hideSelectedOptionsClassNameRef.current = `async-paginate-hide-selected-options-${hideSelectedOptionsUniqCounter}`;
 		}
 
+		const labelFieldName =
+			(fieldNames as AntdFieldNames | undefined)?.label ?? "label";
+
+		const highlightOptions =
+			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;
+
+		const resolvedOptionRender: AntdOptionRender | undefined =
+			optionRender ??
+			(highlightOptions
+				? (option) => {
+						const label = (option.data as Record<string, unknown>)[
+							labelFieldName
+						];
+
+						if (typeof label !== "string") {
+							return option.label;
+						}
+
+						return highlightText(
+							label,
+							asyncPaginateProps.inputValue,
+							highlightOptions,
+						);
+					}
+				: undefined);
+
 		// antd's onChange(value, option) always gives the full option object(s)
 		// as the 2nd argument — that's what this library's value/onChange
 		// contract has always exposed, so ignore the primitive 1st argument.
@@ -151,6 +183,8 @@ export function withAsyncPaginate(
 									.join(" ")
 							: popupClassName
 					}
+					fieldNames={fieldNames}
+					optionRender={resolvedOptionRender}
 					options={asyncPaginateProps.options as never}
 					searchValue={asyncPaginateProps.inputValue}
 					onSearch={asyncPaginateProps.onInputChange}
