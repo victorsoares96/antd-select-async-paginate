@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { ShowSelectedOnTop } from "./ShowSelectedOnTop";
+import rawSource from "./ShowSelectedOnTop.tsx?raw";
 
 const meta: Meta<typeof ShowSelectedOnTop> = {
 	title: "react-select-async-paginate",
@@ -13,5 +15,10 @@ export const ShowSelectedOnTopStory: Story = {
 	args: {
 		hideSelectedOptions: false,
 	},
-	render: (props) => <ShowSelectedOnTop {...props} />,
+	render: (props) => (
+		<>
+			<ShowSelectedOnTop {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };

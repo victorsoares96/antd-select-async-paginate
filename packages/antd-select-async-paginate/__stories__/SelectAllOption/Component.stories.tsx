@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { SelectAllOption } from "./SelectAllOption";
+import rawSource from "./SelectAllOption.tsx?raw";
 
 const meta: Meta<typeof SelectAllOption> = {
 	title: "react-select-async-paginate",
@@ -15,5 +17,10 @@ export const SelectAllOptionStory: Story = {
 	},
 
 	name: "Select all option",
-	render: (props) => <SelectAllOption {...props} />,
+	render: (props) => (
+		<>
+			<SelectAllOption {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };

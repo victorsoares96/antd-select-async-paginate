@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { CustomScrollCheck } from "./CustomScrollCheck";
+import rawSource from "./CustomScrollCheck.tsx?raw";
 
 const meta: Meta<typeof CustomScrollCheck> = {
 	title: "react-select-async-paginate",
@@ -10,5 +12,10 @@ type Story = StoryObj<typeof CustomScrollCheck>;
 
 export const CustomScrollCheckStory: Story = {
 	name: "Custom Scroll Check",
-	render: (props) => <CustomScrollCheck {...props} />,
+	render: (props) => (
+		<>
+			<CustomScrollCheck {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };

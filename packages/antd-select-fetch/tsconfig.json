@@ -18,7 +18,7 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "types": ["@vitest/browser/providers/playwright"]
+    "types": ["@vitest/browser/providers/playwright", "vite/client"]
   },
   "include": [
     "src/**/*",

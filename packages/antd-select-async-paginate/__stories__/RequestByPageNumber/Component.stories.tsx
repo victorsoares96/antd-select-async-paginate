@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { RequestByPageNumber } from "./RequestByPageNumber";
+import rawSource from "./RequestByPageNumber.tsx?raw";
 
 const meta: Meta<typeof RequestByPageNumber> = {
 	title: "react-select-async-paginate",
@@ -10,5 +12,10 @@ type Story = StoryObj<typeof RequestByPageNumber>;
 
 export const RequestByPageNumberStory: Story = {
 	name: "Request by Page Number",
-	render: (props) => <RequestByPageNumber {...props} />,
+	render: (props) => (
+		<>
+			<RequestByPageNumber {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };

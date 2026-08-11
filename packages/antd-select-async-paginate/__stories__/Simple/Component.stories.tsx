@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { Simple } from "./Simple";
+import rawSource from "./Simple.tsx?raw";
 
 const meta: Meta<typeof Simple> = {
 	title: "react-select-async-paginate",
@@ -10,5 +12,10 @@ type Story = StoryObj<typeof Simple>;
 
 export const SimpleStory: Story = {
 	name: "Simple",
-	render: (props) => <Simple {...props} />,
+	render: (props) => (
+		<>
+			<Simple {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };

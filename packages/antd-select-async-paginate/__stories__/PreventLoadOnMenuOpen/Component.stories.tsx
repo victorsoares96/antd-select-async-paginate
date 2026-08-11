@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { StorySource } from "../StorySource";
 import { PreventLoadOnMenuOpen } from "./PreventLoadOnMenuOpen";
+import rawSource from "./PreventLoadOnMenuOpen.tsx?raw";
 
 const meta: Meta<typeof PreventLoadOnMenuOpen> = {
 	title: "react-select-async-paginate",
@@ -13,5 +15,10 @@ export const PreventLoadOnMenuOpenStory: Story = {
 	args: {
 		loadOptionsOnMenuOpen: false,
 	},
-	render: (props) => <PreventLoadOnMenuOpen {...props} />,
+	render: (props) => (
+		<>
+			<PreventLoadOnMenuOpen {...props} />
+			<StorySource code={rawSource} />
+		</>
+	),
 };
