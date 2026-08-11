@@ -4,22 +4,15 @@ import type {
 	UseAsyncPaginateResult,
 } from "antd-select-async-paginate";
 import type { ReactElement } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useRef } from "react";
 import type { SelectFetchProps, SelectFetchType } from "./types";
 import { useSelectFetch } from "./useSelectFetch";
 
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
-type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 
-const getOptionValue = (option: unknown, valueFieldName: string): unknown => {
-	if (typeof option !== "object" || option === null) {
-		return undefined;
-	}
-
-	return (option as Record<string, unknown>)[valueFieldName];
-};
+let hideSelectedOptionsUniqCounter = 0;
 
 export function withSelectFetch(
 	SelectComponent: typeof AntdSelect,
@@ -41,8 +34,7 @@ export function withSelectFetch(
 			isMulti,
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
-			fieldNames,
-			value,
+			popupClassName,
 			onChange,
 
 			// UseSelectFetchParams fields (url-fetching config + the
@@ -128,36 +120,15 @@ export function withSelectFetch(
 					? isLoadingLegacyProp
 					: asyncPaginateProps.isLoading;
 
-		const valueFieldName =
-			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
-
-		const displayedOptions = useMemo(() => {
-			if (!hideSelectedOptions) {
-				return asyncPaginateProps.options;
-			}
-
-			const valueArray = Array.isArray(value) ? value : value ? [value] : [];
-			const selectedValues = new Set(
-				valueArray.map((option) => getOptionValue(option, valueFieldName)),
-			);
-
-			return asyncPaginateProps.options.filter((option) => {
-				if (
-					typeof option !== "object" ||
-					option === null ||
-					"options" in option
-				) {
-					return true;
-				}
-
-				return !selectedValues.has(getOptionValue(option, valueFieldName));
-			});
-		}, [
-			asyncPaginateProps.options,
-			hideSelectedOptions,
-			value,
-			valueFieldName,
-		]);
+		// See withAsyncPaginate.tsx for why hideSelectedOptions hides via CSS
+		// instead of filtering `options`: filtering breaks rc-select's
+		// ability to rebuild already-selected options' full data on later
+		// selections.
+		const hideSelectedOptionsClassNameRef = useRef<string>(undefined);
+		if (!hideSelectedOptionsClassNameRef.current) {
+			hideSelectedOptionsUniqCounter += 1;
+			hideSelectedOptionsClassNameRef.current = `async-paginate-hide-selected-options-${hideSelectedOptionsUniqCounter}`;
+		}
 
 		const handleChange = useCallback<AntdOnChange>(
 			(_value, option) => {
@@ -171,31 +142,43 @@ export function withSelectFetch(
 		);
 
 		return (
-			<SelectComponent
-				{...(restSelectProps as object)}
-				fieldNames={fieldNames}
-				value={value as never}
-				options={displayedOptions as never}
-				searchValue={asyncPaginateProps.inputValue}
-				onSearch={asyncPaginateProps.onInputChange}
-				showSearch={showSearch}
-				mode={mode ?? (isMulti ? "multiple" : undefined)}
-				style={{ width: "100%", ...style }}
-				open={asyncPaginateProps.menuIsOpen}
-				onOpenChange={(open) => {
-					if (open) {
-						asyncPaginateProps.onMenuOpen();
-					} else {
-						asyncPaginateProps.onMenuClose();
+			<>
+				{hideSelectedOptions ? (
+					<style>
+						{`.${hideSelectedOptionsClassNameRef.current} .ant-select-item-option-selected { display: none; }`}
+					</style>
+				) : null}
+				<SelectComponent
+					{...(restSelectProps as object)}
+					popupClassName={
+						hideSelectedOptions
+							? [popupClassName, hideSelectedOptionsClassNameRef.current]
+									.filter(Boolean)
+									.join(" ")
+							: popupClassName
 					}
-				}}
-				onPopupScroll={asyncPaginateProps.handlePopupScroll}
-				filterOption={asyncPaginateProps.filterOption as never}
-				loading={isLoading}
-				virtual={virtual}
-				onChange={handleChange}
-				ref={selectRef as never}
-			/>
+					options={asyncPaginateProps.options as never}
+					searchValue={asyncPaginateProps.inputValue}
+					onSearch={asyncPaginateProps.onInputChange}
+					showSearch={showSearch}
+					mode={mode ?? (isMulti ? "multiple" : undefined)}
+					style={{ width: "100%", ...style }}
+					open={asyncPaginateProps.menuIsOpen}
+					onOpenChange={(open) => {
+						if (open) {
+							asyncPaginateProps.onMenuOpen();
+						} else {
+							asyncPaginateProps.onMenuClose();
+						}
+					}}
+					onPopupScroll={asyncPaginateProps.handlePopupScroll}
+					filterOption={asyncPaginateProps.filterOption as never}
+					loading={isLoading}
+					virtual={virtual}
+					onChange={handleChange}
+					ref={selectRef as never}
+				/>
+			</>
 		);
 	}
 

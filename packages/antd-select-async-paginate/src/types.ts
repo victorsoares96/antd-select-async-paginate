@@ -186,10 +186,11 @@ export type ComponentProps<_OptionType> = {
 	 */
 	closeMenuOnSelect?: boolean;
 	/**
-	 * Hide already-selected options from the dropdown list. Compares
-	 * options against the current `value` using `fieldNames.value`
-	 * (default `"value"`, per antd's own default). Grouped options are
-	 * left untouched. Matches react-select's `hideSelectedOptions`
+	 * Hide already-selected options from the dropdown list. Implemented via
+	 * a scoped CSS rule (not by removing them from `options`) so antd keeps
+	 * full data for every selected option — removing an option from
+	 * `options` breaks rc-select's ability to rebuild that option's full
+	 * data on later selections. Matches react-select's `hideSelectedOptions`
 	 * convention. `false` by default.
 	 */
 	hideSelectedOptions?: boolean;

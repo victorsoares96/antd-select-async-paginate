@@ -124,7 +124,7 @@ Not required. Boolean, default `false`. Force-closes the popup right after any s
 
 ### hideSelectedOptions
 
-Not required. Boolean, default `false`. Hides already-selected options from the dropdown list. Compares options against the current `value` using `fieldNames.value` (default `"value"`, same as antd's own default) — works out of the box for the common `{ value, label }` option shape, or respects a custom `fieldNames` you already pass. Grouped options are left untouched. Matches react-select's `hideSelectedOptions` convention.
+Not required. Boolean, default `false`. Hides already-selected options from the dropdown list. Implemented with a scoped CSS rule rather than removing them from `options` — removing a selected option from `options` breaks rc-select's ability to rebuild that option's full data (label, extra fields) the next time any option is picked, degrading it to an incomplete object. Matches react-select's `hideSelectedOptions` convention.
 
 ### selectAllOption
 

@@ -1,6 +1,6 @@
 import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useRef } from "react";
 import type {
 	AsyncPaginateProps,
 	GroupBase,
@@ -12,15 +12,8 @@ import { useAsyncPaginate } from "./useAsyncPaginate";
 const defaultCacheUniqs: unknown[] = [];
 
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
-type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 
-const getOptionValue = (option: unknown, valueFieldName: string): unknown => {
-	if (typeof option !== "object" || option === null) {
-		return undefined;
-	}
-
-	return (option as Record<string, unknown>)[valueFieldName];
-};
+let hideSelectedOptionsUniqCounter = 0;
 
 export function withAsyncPaginate(
 	SelectComponent: typeof AntdSelect,
@@ -45,8 +38,7 @@ export function withAsyncPaginate(
 			isMulti,
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
-			fieldNames,
-			value,
+			popupClassName,
 			onChange,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
@@ -115,39 +107,19 @@ export function withAsyncPaginate(
 					? isLoadingLegacyProp
 					: asyncPaginateProps.isLoading;
 
-		const valueFieldName =
-			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
-
-		const displayedOptions = useMemo(() => {
-			if (!hideSelectedOptions) {
-				return asyncPaginateProps.options;
-			}
-
-			const valueArray = Array.isArray(value) ? value : value ? [value] : [];
-			const selectedValues = new Set(
-				valueArray.map((option) => getOptionValue(option, valueFieldName)),
-			);
-
-			return asyncPaginateProps.options.filter((option) => {
-				// grouped options are left untouched — filtering their nested
-				// options generically would also need GroupBase's own options
-				// field name, not worth the complexity for this convenience prop
-				if (
-					typeof option !== "object" ||
-					option === null ||
-					"options" in option
-				) {
-					return true;
-				}
-
-				return !selectedValues.has(getOptionValue(option, valueFieldName));
-			});
-		}, [
-			asyncPaginateProps.options,
-			hideSelectedOptions,
-			value,
-			valueFieldName,
-		]);
+		// hideSelectedOptions must NOT remove selected options from the
+		// `options` array handed to antd: rc-select rebuilds each selected
+		// option's full data from the current `options` list on every
+		// onChange (proven by an earlier bug — see resolveSelectAllChange),
+		// so an option missing from `options` degrades to an incomplete
+		// object as soon as another option is picked. Hiding is done with a
+		// scoped CSS rule instead, keeping `options` — and antd's internal
+		// value tracking — fully intact.
+		const hideSelectedOptionsClassNameRef = useRef<string>(undefined);
+		if (!hideSelectedOptionsClassNameRef.current) {
+			hideSelectedOptionsUniqCounter += 1;
+			hideSelectedOptionsClassNameRef.current = `async-paginate-hide-selected-options-${hideSelectedOptionsUniqCounter}`;
+		}
 
 		// antd's onChange(value, option) always gives the full option object(s)
 		// as the 2nd argument — that's what this library's value/onChange
@@ -164,31 +136,43 @@ export function withAsyncPaginate(
 		);
 
 		return (
-			<SelectComponent
-				{...(restSelectProps as object)}
-				fieldNames={fieldNames}
-				value={value as never}
-				options={displayedOptions as never}
-				searchValue={asyncPaginateProps.inputValue}
-				onSearch={asyncPaginateProps.onInputChange}
-				showSearch={showSearch}
-				mode={mode ?? (isMulti ? "multiple" : undefined)}
-				style={{ width: "100%", ...style }}
-				open={asyncPaginateProps.menuIsOpen}
-				onOpenChange={(open) => {
-					if (open) {
-						asyncPaginateProps.onMenuOpen();
-					} else {
-						asyncPaginateProps.onMenuClose();
+			<>
+				{hideSelectedOptions ? (
+					<style>
+						{`.${hideSelectedOptionsClassNameRef.current} .ant-select-item-option-selected { display: none; }`}
+					</style>
+				) : null}
+				<SelectComponent
+					{...(restSelectProps as object)}
+					popupClassName={
+						hideSelectedOptions
+							? [popupClassName, hideSelectedOptionsClassNameRef.current]
+									.filter(Boolean)
+									.join(" ")
+							: popupClassName
 					}
-				}}
-				onPopupScroll={asyncPaginateProps.handlePopupScroll}
-				filterOption={asyncPaginateProps.filterOption as never}
-				loading={isLoading}
-				virtual={virtual}
-				onChange={handleChange}
-				ref={selectRef as Ref<never>}
-			/>
+					options={asyncPaginateProps.options as never}
+					searchValue={asyncPaginateProps.inputValue}
+					onSearch={asyncPaginateProps.onInputChange}
+					showSearch={showSearch}
+					mode={mode ?? (isMulti ? "multiple" : undefined)}
+					style={{ width: "100%", ...style }}
+					open={asyncPaginateProps.menuIsOpen}
+					onOpenChange={(open) => {
+						if (open) {
+							asyncPaginateProps.onMenuOpen();
+						} else {
+							asyncPaginateProps.onMenuClose();
+						}
+					}}
+					onPopupScroll={asyncPaginateProps.handlePopupScroll}
+					filterOption={asyncPaginateProps.filterOption as never}
+					loading={isLoading}
+					virtual={virtual}
+					onChange={handleChange}
+					ref={selectRef as Ref<never>}
+				/>
+			</>
 		);
 	}
 
