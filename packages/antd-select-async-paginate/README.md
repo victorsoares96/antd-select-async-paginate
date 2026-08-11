@@ -110,6 +110,30 @@ Not required. Function. Post-mapping of loaded options to display them in the me
 
 Ref for the underlying antd `Select` instance.
 
+### Collapsing tags in multi-select (maxTagCount)
+
+Not a prop of this library — antd's own `maxTagCount`/`maxTagPlaceholder` already pass straight through untouched, so a multi-select with many selected options doesn't have to grow the input's height. This is opt-in (not applied by default) since some consumers want every tag always visible:
+
+```javascript
+import { Tooltip } from 'antd';
+import { AsyncPaginate } from 'antd-select-async-paginate';
+
+<AsyncPaginate
+  mode="multiple"
+  value={value}
+  onChange={setValue}
+  loadOptions={loadOptions}
+  maxTagCount="responsive"
+  maxTagPlaceholder={(omittedValues) => (
+    <Tooltip title={omittedValues.map(({ label }) => label).join(', ')}>
+      <span>+{omittedValues.length} more</span>
+    </Tooltip>
+  )}
+/>
+```
+
+See the `Responsive tags (maxTagCount)` story for a working example.
+
 ### isMulti
 
 Not required. Boolean. Convenience for antd's `mode="multiple"`, matching react-select's `isMulti` convention. Ignored if `mode` is passed explicitly.
