@@ -150,6 +150,10 @@ Not required. Boolean, default `false`. Force-closes the popup right after any s
 
 Not required. Boolean, default `false`. Hides already-selected options from the dropdown list. Implemented with a scoped CSS rule rather than removing them from `options` — removing a selected option from `options` breaks rc-select's ability to rebuild that option's full data (label, extra fields) the next time any option is picked, degrading it to an incomplete object. Matches react-select's `hideSelectedOptions` convention.
 
+### showSelectedOnTop
+
+Not required. Boolean, default `false`. Pins already-selected option(s) to the top of the dropdown, ahead of whatever `mapOptionsForMenu` already produced. Injects the selected value(s) even if they aren't in the currently loaded page of `options`. Matches on `fieldNames.value` (defaults to `"value"`), so it respects a custom field mapping. Flat `options` only — a no-op if `options` is grouped.
+
 ### highlightSearchTerm
 
 Not required. `boolean | { className?: string; style?: CSSProperties }`, default `false`. Wraps the matched search term inside each option's label in a `<mark>` element, using antd's native `optionRender`. Pass an object to customize the wrapper's `className`/`style` instead of the default yellow highlight (`#ffe58f`). Ignored if `optionRender` is passed explicitly (your renderer always wins).

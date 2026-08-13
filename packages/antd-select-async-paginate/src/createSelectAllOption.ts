@@ -37,6 +37,8 @@ export function createSelectAllOption<Value extends string, Label>({
 	Value,
 	Label
 > {
+	const baseValueString = String(baseValue);
+
 	const buildSelectAllOption = ((inputValue: string) => {
 		if (!inputValue) {
 			return { value: baseValue, label };
@@ -48,11 +50,25 @@ export function createSelectAllOption<Value extends string, Label>({
 		};
 	}) as SelectAllOptionBuilder<Value, Label>;
 
+	// Compares by string content rather than gating on `typeof option.value
+	// === "string"`: the `Value extends string` constraint is compile-time
+	// only, so a caller bypassing it with a cast (or plain JS, no type-check
+	// at all) can hand a non-string `value` in here — matching by
+	// stringified content still recognizes it as the select-all option.
 	buildSelectAllOption.isSelectAllOption = (option: {
 		value: unknown;
-	}): boolean =>
-		typeof option.value === "string" &&
-		(option.value === baseValue || option.value.startsWith(`${baseValue}:`));
+	}): boolean => {
+		if (typeof option.value !== "string" && typeof option.value !== "number") {
+			return false;
+		}
+
+		const optionValueString = String(option.value);
+
+		return (
+			optionValueString === baseValueString ||
+			optionValueString.startsWith(`${baseValueString}:`)
+		);
+	};
 
 	return buildSelectAllOption;
 }

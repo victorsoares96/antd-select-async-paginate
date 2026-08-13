@@ -202,6 +202,13 @@ export type ComponentProps<_OptionType> = {
 	 * highlight. Ignored if `optionRender` is passed explicitly.
 	 */
 	highlightSearchTerm?: boolean | HighlightTextOptions;
+	/**
+	 * Pin already-selected option(s) to the top of the menu, ahead of
+	 * `mapOptionsForMenu` output. Runs on flat `options` only — a no-op if
+	 * `options` is grouped (`GroupBase[]`). Matches on `fieldNames.value`
+	 * (defaults to `"value"`), so it respects custom field mappings.
+	 */
+	showSelectedOnTop?: boolean;
 };
 
 export type AsyncPaginateProps<

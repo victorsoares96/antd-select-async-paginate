@@ -18,6 +18,37 @@ type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 
 let hideSelectedOptionsUniqCounter = 0;
 
+function mergeSelectedOnTop<OptionType>(
+	options: readonly unknown[],
+	value: OptionType | readonly OptionType[] | null | undefined,
+	valueFieldName: string,
+): unknown[] {
+	if (
+		options.some(
+			(option) => option && typeof option === "object" && "options" in option,
+		)
+	) {
+		return options as unknown[];
+	}
+
+	const selected = value == null ? [] : Array.isArray(value) ? value : [value];
+	if (selected.length === 0) {
+		return options as unknown[];
+	}
+
+	const selectedKeys = new Set(
+		selected.map(
+			(option) => (option as Record<string, unknown>)[valueFieldName],
+		),
+	);
+
+	const rest = (options as Record<string, unknown>[]).filter(
+		(option) => !selectedKeys.has(option[valueFieldName]),
+	);
+
+	return [...selected, ...rest];
+}
+
 export function withAsyncPaginate(
 	SelectComponent: typeof AntdSelect,
 ): WithAsyncPaginateType {
@@ -42,9 +73,11 @@ export function withAsyncPaginate(
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
 			highlightSearchTerm = false,
+			showSelectedOnTop = false,
 			popupClassName,
 			optionRender,
 			fieldNames,
+			value,
 			onChange,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
@@ -129,6 +162,16 @@ export function withAsyncPaginate(
 
 		const labelFieldName =
 			(fieldNames as AntdFieldNames | undefined)?.label ?? "label";
+		const valueFieldName =
+			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
+
+		// Pins selected option(s) to the top, ahead of whatever
+		// mapOptionsForMenu already produced. Flat options only — bails out
+		// (returns options unchanged) the moment it sees a grouped shape,
+		// since "top of the menu" is ambiguous once options are grouped.
+		const menuOptions = showSelectedOnTop
+			? mergeSelectedOnTop(asyncPaginateProps.options, value, valueFieldName)
+			: asyncPaginateProps.options;
 
 		const highlightOptions =
 			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;
@@ -185,7 +228,8 @@ export function withAsyncPaginate(
 					}
 					fieldNames={fieldNames}
 					optionRender={resolvedOptionRender}
-					options={asyncPaginateProps.options as never}
+					options={menuOptions as never}
+					value={value}
 					searchValue={asyncPaginateProps.inputValue}
 					onSearch={asyncPaginateProps.onInputChange}
 					showSearch={showSearch}
