@@ -43,4 +43,17 @@ describe("createSelectAllOption", () => {
 			selectAllOption.isSelectAllOption({ value: "__all__not-a-match" }),
 		).toBe(false);
 	});
+
+	test("isSelectAllOption still matches when value bypasses the `Value extends string` constraint (cast/plain JS) and is a number", () => {
+		const selectAllOption = createSelectAllOption({
+			// biome-ignore lint/suspicious/noExplicitAny: simulating a caller that bypasses the `Value extends string` constraint via a cast
+			value: -1 as any,
+			label: "Todos",
+			searchLabel: (search) => `Todos: ${search}`,
+		});
+
+		expect(selectAllOption.isSelectAllOption({ value: -1 })).toBe(true);
+		expect(selectAllOption.isSelectAllOption({ value: "-1:abc" })).toBe(true);
+		expect(selectAllOption.isSelectAllOption({ value: -2 })).toBe(false);
+	});
 });
