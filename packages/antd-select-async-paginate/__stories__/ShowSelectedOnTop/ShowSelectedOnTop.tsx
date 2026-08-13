@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import sleep from "sleep-promise";
-import type { GroupBase, LoadOptions, OptionsOrGroups } from "../../src";
+import type { GroupBase, LoadOptions } from "../../src";
 import { AsyncPaginate } from "../../src";
 
 import type { StoryProps } from "../types";
@@ -61,38 +61,6 @@ export function ShowSelectedOnTop(
 
 	const loadOptionsHandler = props?.loadOptions || loadOptions;
 
-	const mapOptionsForMenu = useCallback(
-		(options: OptionsOrGroups<OptionType, GroupBase<OptionType>>) => {
-			if (!value) {
-				return options;
-			}
-
-			if (Array.isArray(value)) {
-				if (value.length === 0) {
-					return options;
-				}
-
-				const valueSet = new Set(value.map((option) => option.value));
-
-				return [
-					...value,
-					...options.filter(
-						(option) => !valueSet.has((option as OptionType).value),
-					),
-				];
-			}
-
-			return [
-				value,
-				...options.filter(
-					(option) =>
-						(option as OptionType).value !== (value as OptionType).value,
-				),
-			];
-		},
-		[value],
-	);
-
 	return (
 		<div
 			style={{
@@ -102,7 +70,7 @@ export function ShowSelectedOnTop(
 			<AsyncPaginate
 				{...props}
 				value={value}
-				mapOptionsForMenu={mapOptionsForMenu}
+				showSelectedOnTop
 				loadOptions={loadOptionsHandler}
 				onChange={onChange}
 			/>
