@@ -69,4 +69,24 @@ describe("HideSelectedOptions", () => {
 			"Option 3",
 		]);
 	});
+
+	test("shows a placeholder once every loaded option is selected and there's nothing left to load", async () => {
+		const screen = render(<HideSelectedOptions loadOptions={threePerPage} />);
+
+		await openMenu(screen);
+
+		await getMenuOption(screen, "Option 1").click();
+		await getMenuOption(screen, "Option 2").click();
+		await getMenuOption(screen, "Option 3").click();
+
+		await expect.element(getMenuOption(screen, "Option 4")).toBeInTheDocument();
+
+		await getMenuOption(screen, "Option 4").click();
+		await getMenuOption(screen, "Option 5").click();
+		await getMenuOption(screen, "Option 6").click();
+
+		await expect
+			.element(screen.getByText("Não há mais opções disponíveis"))
+			.toBeInTheDocument();
+	});
 });

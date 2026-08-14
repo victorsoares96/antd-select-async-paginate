@@ -15,6 +15,9 @@ const defaultCacheUniqs: unknown[] = [];
 type AntdOnChange = GetProp<typeof AntdSelect, "onChange">;
 type AntdOptionRender = GetProp<typeof AntdSelect, "optionRender">;
 type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
+type AntdDropdownRender = GetProp<typeof AntdSelect, "dropdownRender">;
+
+const defaultNoMoreOptionsContent = "Não há mais opções disponíveis";
 
 let hideSelectedOptionsUniqCounter = 0;
 
@@ -72,10 +75,12 @@ export function withAsyncPaginate(
 			isMulti,
 			closeMenuOnSelect = false,
 			hideSelectedOptions = false,
+			noMoreOptionsContent = defaultNoMoreOptionsContent,
 			highlightSearchTerm = false,
 			showSelectedOnTop = false,
 			popupClassName,
 			optionRender,
+			dropdownRender: dropdownRenderProp,
 			fieldNames,
 			value,
 			onChange,
@@ -224,6 +229,62 @@ export function withAsyncPaginate(
 			? mergeSelectedOnTop(optionsWithSelectAll, value, valueFieldName)
 			: optionsWithSelectAll;
 
+		// hideSelectedOptions hides every selected option via CSS, so once
+		// every currently loaded option is selected (and there's nothing left
+		// to load) the dropdown looks empty even though it isn't. Flat
+		// `options` only — bails out for grouped (`GroupBase[]`) options, same
+		// as `mergeSelectedOnTop`.
+		const showNoMoreOptionsPlaceholder = (() => {
+			if (!hideSelectedOptions || asyncPaginateProps.hasMore) {
+				return false;
+			}
+
+			const loadedOptions = asyncPaginateProps.options;
+
+			if (loadedOptions.length === 0) {
+				return false;
+			}
+
+			if (
+				loadedOptions.some(
+					(option) =>
+						option && typeof option === "object" && "options" in option,
+				)
+			) {
+				return false;
+			}
+
+			const selected =
+				value == null ? [] : Array.isArray(value) ? value : [value];
+			const selectedKeys = new Set(
+				selected.map(
+					(option) => (option as Record<string, unknown>)[valueFieldName],
+				),
+			);
+
+			return (loadedOptions as Record<string, unknown>[]).every((option) =>
+				selectedKeys.has(option[valueFieldName]),
+			);
+		})();
+
+		const resolvedDropdownRender: AntdDropdownRender | undefined =
+			showNoMoreOptionsPlaceholder
+				? (menu) => (
+						<>
+							{dropdownRenderProp ? dropdownRenderProp(menu) : menu}
+							<div
+								style={{
+									padding: "8px 12px",
+									textAlign: "center",
+									color: "rgba(0, 0, 0, 0.45)",
+								}}
+							>
+								{noMoreOptionsContent}
+							</div>
+						</>
+					)
+				: dropdownRenderProp;
+
 		const highlightOptions =
 			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;
 
@@ -279,6 +340,7 @@ export function withAsyncPaginate(
 					}
 					fieldNames={fieldNames}
 					optionRender={resolvedOptionRender}
+					dropdownRender={resolvedDropdownRender}
 					options={menuOptions as never}
 					value={value}
 					searchValue={asyncPaginateProps.inputValue}

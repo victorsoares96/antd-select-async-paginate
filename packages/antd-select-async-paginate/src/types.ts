@@ -1,5 +1,5 @@
 import type { SelectProps as AntdSelectProps } from "antd";
-import type { ReactElement, Ref, UIEvent } from "react";
+import type { ReactElement, ReactNode, Ref, UIEvent } from "react";
 import type { HighlightTextOptions } from "./highlightText";
 
 export type RequestOptionsCallerType =
@@ -185,6 +185,13 @@ export type ComponentProps<_OptionType> = {
 	 * convention. `false` by default.
 	 */
 	hideSelectedOptions?: boolean;
+	/**
+	 * Content shown in place of the (now visually empty) dropdown once
+	 * `hideSelectedOptions` has hidden every currently loaded option and
+	 * there are no more pages to load. Flat `options` only — never shown
+	 * for grouped (`GroupBase[]`) options.
+	 */
+	noMoreOptionsContent?: ReactNode;
 	/**
 	 * Highlight the matched search term inside each option's label, using
 	 * antd's `optionRender`. Pass an object to customize the `<mark>`
