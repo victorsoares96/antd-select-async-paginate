@@ -79,6 +79,7 @@ export function withAsyncPaginate(
 			fieldNames,
 			value,
 			onChange,
+			selectAllOption,
 
 			// UseAsyncPaginateParams fields consumed by useAsyncPaginate below —
 			// stripped out here so they never leak into `restSelectProps` and
@@ -101,7 +102,6 @@ export function withAsyncPaginate(
 			defaultInputValue,
 			defaultMenuIsOpen,
 			mapOptionsForMenu,
-			selectAllOption,
 			onInputChange,
 			onMenuClose,
 			onMenuOpen,
@@ -130,7 +130,6 @@ export function withAsyncPaginate(
 					defaultInputValue,
 					defaultMenuIsOpen,
 					mapOptionsForMenu,
-					selectAllOption,
 					onInputChange,
 					onMenuClose,
 					onMenuOpen,
@@ -165,13 +164,28 @@ export function withAsyncPaginate(
 		const valueFieldName =
 			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
 
+		// Built here (not in the Base hook) because it needs `value`, which is
+		// a controlled prop only the HOC knows about — the Base hook only
+		// deals with inputValue/menuIsOpen and has no concept of selection.
+		const allOption = selectAllOption
+			? selectAllOption(asyncPaginateProps.inputValue, {
+					value,
+					options: asyncPaginateProps.options,
+					hasMore: asyncPaginateProps.hasMore,
+				})
+			: null;
+
+		const optionsWithSelectAll = allOption
+			? [allOption, ...(asyncPaginateProps.options as unknown[])]
+			: asyncPaginateProps.options;
+
 		// Pins selected option(s) to the top, ahead of whatever
 		// mapOptionsForMenu already produced. Flat options only — bails out
 		// (returns options unchanged) the moment it sees a grouped shape,
 		// since "top of the menu" is ambiguous once options are grouped.
 		const menuOptions = showSelectedOnTop
-			? mergeSelectedOnTop(asyncPaginateProps.options, value, valueFieldName)
-			: asyncPaginateProps.options;
+			? mergeSelectedOnTop(optionsWithSelectAll, value, valueFieldName)
+			: optionsWithSelectAll;
 
 		const highlightOptions =
 			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;

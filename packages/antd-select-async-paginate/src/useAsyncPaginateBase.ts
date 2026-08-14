@@ -44,7 +44,6 @@ export const useAsyncPaginateBase = <
 		reduceOptions = defaultReduceOptions,
 		shouldLoadMore = defaultShouldLoadMore,
 		mapOptionsForMenu = undefined,
-		selectAllOption = undefined,
 	} = params;
 
 	const menuIsOpenRef = useLatest(menuIsOpen);
@@ -148,22 +147,10 @@ export const useAsyncPaginateBase = <
 		optionsCacheRef.current[inputValue] || getInitialCache(params);
 
 	const options = useMemo(() => {
-		const mappedOptions = mapOptionsForMenu
+		return mapOptionsForMenu
 			? mapOptionsForMenu(currentOptions.options)
 			: currentOptions.options;
-
-		if (!selectAllOption) {
-			return mappedOptions;
-		}
-
-		const allOption = selectAllOption(inputValue);
-
-		if (!allOption) {
-			return mappedOptions;
-		}
-
-		return [allOption, ...mappedOptions];
-	}, [currentOptions.options, mapOptionsForMenu, selectAllOption, inputValue]);
+	}, [currentOptions.options, mapOptionsForMenu]);
 
 	return {
 		handlePopupScroll,
@@ -172,6 +159,7 @@ export const useAsyncPaginateBase = <
 		isLoading:
 			currentOptions.isLoading || currentOptions.lockedUntil > Date.now(),
 		isFirstLoad: currentOptions.isFirstLoad,
+		hasMore: currentOptions.hasMore,
 		options,
 	};
 };

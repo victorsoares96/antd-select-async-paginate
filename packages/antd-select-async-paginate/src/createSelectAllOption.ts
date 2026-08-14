@@ -11,14 +11,49 @@ export type CreateSelectAllOptionParams<Value extends string, Label> = {
 	searchLabel: (inputValue: string) => Label;
 };
 
+export type SelectAllOptionContext<OptionType extends { value: unknown }> = {
+	/** Currently selected value(s), as controlled by the consumer */
+	value: OptionType | readonly OptionType[] | null | undefined;
+	/** Currently loaded options (post `mapOptionsForMenu`) — flat or grouped */
+	options: ReadonlyArray<OptionType | { options: readonly OptionType[] }>;
+	/** Whether more pages are still available to load */
+	hasMore: boolean;
+};
+
 export type SelectAllOptionBuilder<Value extends string, Label> = {
-	(inputValue: string): { value: SelectAllOptionValue<Value>; label: Label };
+	<OptionType extends { value: unknown }>(
+		inputValue: string,
+		context?: SelectAllOptionContext<OptionType>,
+	): { value: SelectAllOptionValue<Value>; label: Label } | null;
 	/**
 	 * Matches both the unfiltered and search-scoped select-all options this
 	 * builder produces. Pass as the 3rd argument of `resolveSelectAllChange`.
 	 */
 	isSelectAllOption: (option: { value: unknown }) => boolean;
 };
+
+function isEverySelected<OptionType extends { value: unknown }>(
+	context: SelectAllOptionContext<OptionType> | undefined,
+): boolean {
+	if (!context || context.hasMore || context.options.length === 0) {
+		return false;
+	}
+
+	// Grouped options (`GroupBase[]`) have no flat item list to compare
+	// against — bail out (treat as "not all selected") the same way
+	// `mergeSelectedOnTop` does for `showSelectedOnTop`.
+	if (context.options.some((option) => "options" in option)) {
+		return false;
+	}
+
+	const { value } = context;
+	const options = context.options as readonly OptionType[];
+
+	const selected = value == null ? [] : Array.isArray(value) ? value : [value];
+	const selectedValues = new Set(selected.map((option) => option.value));
+
+	return options.every((option) => selectedValues.has(option.value));
+}
 
 /**
  * Convenience over the `selectAllOption` prop for the common
@@ -39,7 +74,14 @@ export function createSelectAllOption<Value extends string, Label>({
 > {
 	const baseValueString = String(baseValue);
 
-	const buildSelectAllOption = ((inputValue: string) => {
+	const buildSelectAllOption = ((
+		inputValue: string,
+		context?: SelectAllOptionContext<{ value: unknown }>,
+	) => {
+		if (isEverySelected(context)) {
+			return null;
+		}
+
 		if (!inputValue) {
 			return { value: baseValue, label };
 		}
