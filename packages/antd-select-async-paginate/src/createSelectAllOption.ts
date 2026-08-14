@@ -32,17 +32,24 @@ export type SelectAllOptionBuilder<Value extends string, Label> = {
 	isSelectAllOption: (option: { value: unknown }) => boolean;
 };
 
+// Grouped options (`GroupBase[]`) have no flat item list to compare
+// against — bail out the same way `mergeSelectedOnTop` does for
+// `showSelectedOnTop`.
+function isGrouped<OptionType extends { value: unknown }>(
+	context: SelectAllOptionContext<OptionType>,
+): boolean {
+	return context.options.some((option) => "options" in option);
+}
+
 function isEverySelected<OptionType extends { value: unknown }>(
 	context: SelectAllOptionContext<OptionType> | undefined,
 ): boolean {
-	if (!context || context.hasMore || context.options.length === 0) {
-		return false;
-	}
-
-	// Grouped options (`GroupBase[]`) have no flat item list to compare
-	// against — bail out (treat as "not all selected") the same way
-	// `mergeSelectedOnTop` does for `showSelectedOnTop`.
-	if (context.options.some((option) => "options" in option)) {
+	if (
+		!context ||
+		context.hasMore ||
+		context.options.length === 0 ||
+		isGrouped(context)
+	) {
 		return false;
 	}
 
@@ -53,6 +60,18 @@ function isEverySelected<OptionType extends { value: unknown }>(
 	const selectedValues = new Set(selected.map((option) => option.value));
 
 	return options.every((option) => selectedValues.has(option.value));
+}
+
+// Selecting "all" only means something with 2+ items on offer — with 0 or 1
+// loaded, hide the option regardless of hasMore/selection state.
+function hasFewerThanTwoOptions<OptionType extends { value: unknown }>(
+	context: SelectAllOptionContext<OptionType> | undefined,
+): boolean {
+	if (!context || isGrouped(context)) {
+		return false;
+	}
+
+	return context.options.length < 2;
 }
 
 /**
@@ -78,7 +97,7 @@ export function createSelectAllOption<Value extends string, Label>({
 		inputValue: string,
 		context?: SelectAllOptionContext<{ value: unknown }>,
 	) => {
-		if (isEverySelected(context)) {
+		if (isEverySelected(context) || hasFewerThanTwoOptions(context)) {
 			return null;
 		}
 

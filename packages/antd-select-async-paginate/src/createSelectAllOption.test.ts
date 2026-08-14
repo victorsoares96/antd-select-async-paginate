@@ -78,7 +78,10 @@ describe("createSelectAllOption", () => {
 			searchLabel: (search) => `Todos com o termo: "${search}"`,
 		});
 
-		const options = [{ value: "option-1", label: "Option 1" }];
+		const options = [
+			{ value: "option-1", label: "Option 1" },
+			{ value: "option-2", label: "Option 2" },
+		];
 
 		expect(
 			selectAllOption("", { value: options, options, hasMore: true }),
@@ -106,7 +109,7 @@ describe("createSelectAllOption", () => {
 		).toEqual({ value: "__all__", label: "Todos" });
 	});
 
-	test("still returns the option when there are no loaded options at all", () => {
+	test("returns null when there are no loaded options at all", () => {
 		const selectAllOption = createSelectAllOption({
 			value: "__all__",
 			label: "Todos",
@@ -115,7 +118,52 @@ describe("createSelectAllOption", () => {
 
 		expect(
 			selectAllOption("", { value: null, options: [], hasMore: false }),
+		).toBe(null);
+	});
+
+	test("returns null when fewer than 2 options are loaded, even if none are selected and hasMore is true", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+		});
+
+		const options = [{ value: "option-1", label: "Option 1" }];
+
+		expect(selectAllOption("", { value: null, options, hasMore: true })).toBe(
+			null,
+		);
+	});
+
+	test("returns the option once exactly 2 options are loaded", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+		});
+
+		const options = [
+			{ value: "option-1", label: "Option 1" },
+			{ value: "option-2", label: "Option 2" },
+		];
+
+		expect(
+			selectAllOption("", { value: null, options, hasMore: true }),
 		).toEqual({ value: "__all__", label: "Todos" });
+	});
+
+	test("applies the fewer-than-2 rule to the search-scoped variant too", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+		});
+
+		const options = [{ value: "option-1", label: "Option 1" }];
+
+		expect(
+			selectAllOption("abc", { value: null, options, hasMore: false }),
+		).toBe(null);
 	});
 
 	test("isSelectAllOption still matches when value bypasses the `Value extends string` constraint (cast/plain JS) and is a number", () => {
