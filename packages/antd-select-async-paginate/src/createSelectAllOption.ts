@@ -1,3 +1,6 @@
+import { buildSelectedValuesSet, isGroupedOptions } from "./selectionUtils";
+import type { GroupBase, SelectAllOptionContext } from "./types";
+
 export type SelectAllOptionValue<Value extends string> =
 	| Value
 	| `${Value}:${string}`;
@@ -12,13 +15,40 @@ export type CreateSelectAllOptionParams<Value extends string, Label> = {
 };
 
 export type SelectAllOptionBuilder<Value extends string, Label> = {
-	(inputValue: string): { value: SelectAllOptionValue<Value>; label: Label };
+	<OptionType extends { value: unknown }>(
+		inputValue: string,
+		context?: SelectAllOptionContext<OptionType, GroupBase<OptionType>>,
+	): { value: SelectAllOptionValue<Value>; label: Label } | null;
 	/**
 	 * Matches both the unfiltered and search-scoped select-all options this
 	 * builder produces. Pass as the 3rd argument of `resolveSelectAllChange`.
 	 */
 	isSelectAllOption: (option: { value: unknown }) => boolean;
 };
+
+// Selecting "all" only means something with 2+ unselected items on offer.
+// Waits for hasMore=false before hiding: while more pages could still load,
+// today's small remaining count might grow once they arrive.
+function hasFewerThanTwoUnselectedOptions<
+	OptionType extends { value: unknown },
+>(
+	context:
+		| SelectAllOptionContext<OptionType, GroupBase<OptionType>>
+		| undefined,
+): boolean {
+	if (!context || context.hasMore || isGroupedOptions(context.options)) {
+		return false;
+	}
+
+	const options = context.options as readonly OptionType[];
+	const selectedValues = buildSelectedValuesSet(context.value, "value");
+
+	const unselectedCount = options.filter(
+		(option) => !selectedValues.has(option.value),
+	).length;
+
+	return unselectedCount < 2;
+}
 
 /**
  * Convenience over the `selectAllOption` prop for the common
@@ -39,7 +69,17 @@ export function createSelectAllOption<Value extends string, Label>({
 > {
 	const baseValueString = String(baseValue);
 
-	const buildSelectAllOption = ((inputValue: string) => {
+	const buildSelectAllOption = ((
+		inputValue: string,
+		context?: SelectAllOptionContext<
+			{ value: unknown },
+			GroupBase<{ value: unknown }>
+		>,
+	) => {
+		if (hasFewerThanTwoUnselectedOptions(context)) {
+			return null;
+		}
+
 		if (!inputValue) {
 			return { value: baseValue, label };
 		}

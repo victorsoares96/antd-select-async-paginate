@@ -1,5 +1,5 @@
 import type { SelectProps as AntdSelectProps } from "antd";
-import type { ReactElement, Ref, UIEvent } from "react";
+import type { ReactElement, ReactNode, Ref, UIEvent } from "react";
 import type { HighlightTextOptions } from "./highlightText";
 
 export type RequestOptionsCallerType =
@@ -89,6 +89,7 @@ export type UseAsyncPaginateBaseResult<
 	shouldLoadMore: ShouldLoadMore;
 	isLoading: boolean;
 	isFirstLoad: boolean;
+	hasMore: boolean;
 	options: OptionsOrGroups<OptionType, Group>;
 	filterOption: FilterOption<OptionType>;
 };
@@ -139,17 +140,6 @@ export type UseAsyncPaginateParams<
 	mapOptionsForMenu?: (
 		options: OptionsOrGroups<OptionType, Group>,
 	) => OptionsOrGroups<OptionType, Group>;
-	/**
-	 * Builds a synthetic "select all" option prepended to the menu (after
-	 * `mapOptionsForMenu`). Called with the current search value on every
-	 * render, so the option can encode the active search term (e.g. an
-	 * "All matching…" option) or be hidden entirely by returning `null`.
-	 * Pair with `resolveSelectAllChange` in `onChange` to make selecting it
-	 * mutually exclusive with individual options.
-	 * @param inputValue current search value
-	 * @returns the option to prepend, or `null` to show nothing
-	 */
-	selectAllOption?: (inputValue: string) => OptionType | null;
 	onInputChange?: (newValue: string) => void;
 	onMenuClose?: () => void;
 	onMenuOpen?: () => void;
@@ -196,6 +186,13 @@ export type ComponentProps<_OptionType> = {
 	 */
 	hideSelectedOptions?: boolean;
 	/**
+	 * Content shown in place of the (now visually empty) dropdown once
+	 * `hideSelectedOptions` has hidden every currently loaded option and
+	 * there are no more pages to load. Flat `options` only — never shown
+	 * for grouped (`GroupBase[]`) options.
+	 */
+	noMoreOptionsContent?: ReactNode;
+	/**
 	 * Highlight the matched search term inside each option's label, using
 	 * antd's `optionRender`. Pass an object to customize the `<mark>`
 	 * wrapper's `className`/`style` instead of the default yellow
@@ -209,6 +206,18 @@ export type ComponentProps<_OptionType> = {
 	 * (defaults to `"value"`), so it respects custom field mappings.
 	 */
 	showSelectedOnTop?: boolean;
+};
+
+export type SelectAllOptionContext<
+	OptionType,
+	Group extends GroupBase<OptionType>,
+> = {
+	/** Currently selected value(s), as controlled by the consumer */
+	value: OptionType | readonly OptionType[] | null | undefined;
+	/** Currently loaded options (post `mapOptionsForMenu`) */
+	options: OptionsOrGroups<OptionType, Group>;
+	/** Whether more pages are still available to load */
+	hasMore: boolean;
 };
 
 export type AsyncPaginateProps<
@@ -225,6 +234,22 @@ export type AsyncPaginateProps<
 		mode?: "multiple" | "tags";
 		value?: OptionType | readonly OptionType[] | null;
 		onChange?: (value: OptionType | OptionType[] | null) => void;
+		/**
+		 * Builds a synthetic "select all" option prepended to the menu (after
+		 * `mapOptionsForMenu`). Called with the current search value and a
+		 * context with the currently selected `value`, the currently loaded
+		 * `options`, and `hasMore` — so it can hide itself (return `null`)
+		 * once every loaded option is already selected. Pair with
+		 * `resolveSelectAllChange` in `onChange` to make selecting it
+		 * mutually exclusive with individual options.
+		 * @param inputValue current search value
+		 * @param context current value/options/hasMore
+		 * @returns the option to prepend, or `null` to show nothing
+		 */
+		selectAllOption?: (
+			inputValue: string,
+			context: SelectAllOptionContext<OptionType, Group>,
+		) => OptionType | null;
 	};
 
 export type WithAsyncPaginateType = <
