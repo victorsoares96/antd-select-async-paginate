@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Wrapper above antd-select-async-paginate that loads options from specified url",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -22,7 +23,11 @@
     "pagination",
     "fetch"
   ],
-  "repository": "git@github.com:victorsoares96/antd-select-async-paginate.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorsoares96/antd-select-async-paginate.git",
+    "directory": "packages/antd-select-fetch"
+  },
   "homepage": "https://github.com/victorsoares96/antd-select-async-paginate/tree/master/packages/antd-select-fetch",
   "author": "Victor Soares",
   "license": "MIT",
