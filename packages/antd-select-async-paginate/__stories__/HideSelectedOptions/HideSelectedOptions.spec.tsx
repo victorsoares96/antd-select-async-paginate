@@ -86,7 +86,7 @@ describe("HideSelectedOptions", () => {
 		await getMenuOption(screen, "Option 6").click();
 
 		await expect
-			.element(screen.getByText("Não há mais opções disponíveis"))
+			.element(screen.getByText("No more options available"))
 			.toBeInTheDocument();
 	});
 });

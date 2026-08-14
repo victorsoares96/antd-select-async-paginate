@@ -1,8 +1,13 @@
 import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref, UIEvent } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { highlightText } from "./highlightText";
 import { OptionLabelWithTooltip } from "./OptionLabelWithTooltip";
+import {
+	buildSelectedValuesSet,
+	everyOptionSelected,
+	isGroupedOptions,
+} from "./selectionUtils";
 import type {
 	AsyncPaginateProps,
 	GroupBase,
@@ -18,7 +23,7 @@ type AntdOptionRender = GetProp<typeof AntdSelect, "optionRender">;
 type AntdFieldNames = GetProp<typeof AntdSelect, "fieldNames">;
 type AntdDropdownRender = GetProp<typeof AntdSelect, "dropdownRender">;
 
-const defaultNoMoreOptionsContent = "Não há mais opções disponíveis";
+const defaultNoMoreOptionsContent = "No more options available";
 
 let hideSelectedOptionsUniqCounter = 0;
 
@@ -27,11 +32,7 @@ function mergeSelectedOnTop<OptionType>(
 	value: OptionType | readonly OptionType[] | null | undefined,
 	valueFieldName: string,
 ): unknown[] {
-	if (
-		options.some(
-			(option) => option && typeof option === "object" && "options" in option,
-		)
-	) {
+	if (isGroupedOptions(options as unknown[])) {
 		return options as unknown[];
 	}
 
@@ -40,14 +41,10 @@ function mergeSelectedOnTop<OptionType>(
 		return options as unknown[];
 	}
 
-	const selectedKeys = new Set(
-		selected.map(
-			(option) => (option as Record<string, unknown>)[valueFieldName],
-		),
-	);
+	const selectedValues = buildSelectedValuesSet(value, valueFieldName);
 
 	const rest = (options as Record<string, unknown>[]).filter(
-		(option) => !selectedKeys.has(option[valueFieldName]),
+		(option) => !selectedValues.has(option[valueFieldName]),
 	);
 
 	return [...selected, ...rest];
@@ -170,103 +167,104 @@ export function withAsyncPaginate(
 		const valueFieldName =
 			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
 
-		// hideSelectedOptions hides selected options via `display:none`, which
-		// (in a non-virtual list) removes them from layout — once every
-		// currently loaded option is selected, the popup can run out of
-		// scrollable content before `hasMore` is exhausted, so a real
-		// `onPopupScroll` event never fires again to load the next page.
-		// Re-check scrollability after every render and force the same load
-		// a scroll event would have triggered.
+		const selectedValues = useMemo(
+			() => buildSelectedValuesSet(value, valueFieldName),
+			[value, valueFieldName],
+		);
+
+		const loadedOptionsAreGrouped = isGroupedOptions(
+			asyncPaginateProps.options as unknown[],
+		);
+
+		// hideSelectedOptions hides every selected option via CSS, so once
+		// every currently loaded option is selected the popup runs out of
+		// visible content before `hasMore` is exhausted — a real
+		// `onPopupScroll` event would then never fire again to load the next
+		// page. Detected directly from data (not DOM measurement, which would
+		// silently break if antd renamed its internal scroll container), and
+		// synthesizes the same load a real bottom-scroll would have
+		// triggered.
+		const allLoadedOptionsSelected =
+			!loadedOptionsAreGrouped &&
+			everyOptionSelected(
+				asyncPaginateProps.options as unknown[],
+				selectedValues,
+				valueFieldName,
+			);
+
 		useEffect(() => {
 			if (
 				!hideSelectedOptions ||
 				!asyncPaginateProps.menuIsOpen ||
 				!asyncPaginateProps.hasMore ||
-				asyncPaginateProps.isLoading
+				asyncPaginateProps.isLoading ||
+				!allLoadedOptionsSelected
 			) {
 				return;
 			}
 
-			const dropdown = document.querySelector(
-				`.${hideSelectedOptionsClassNameRef.current}`,
-			);
-			const scrollContainer =
-				dropdown?.querySelector<HTMLElement>(".rc-virtual-list-holder") ??
-				dropdown?.querySelector<HTMLElement>('[role="listbox"]');
-
-			if (!scrollContainer) {
-				return;
-			}
-
-			const { scrollHeight, clientHeight, scrollTop } = scrollContainer;
-
-			if (scrollHeight <= clientHeight) {
-				asyncPaginateProps.handlePopupScroll({
-					currentTarget: { scrollHeight, clientHeight, scrollTop },
-				} as UIEvent<HTMLDivElement>);
-			}
-		});
+			asyncPaginateProps.handlePopupScroll({
+				currentTarget: { scrollHeight: 0, clientHeight: 0, scrollTop: 0 },
+			} as UIEvent<HTMLDivElement>);
+		}, [
+			hideSelectedOptions,
+			asyncPaginateProps.menuIsOpen,
+			asyncPaginateProps.hasMore,
+			asyncPaginateProps.isLoading,
+			asyncPaginateProps.handlePopupScroll,
+			allLoadedOptionsSelected,
+		]);
 
 		// Built here (not in the Base hook) because it needs `value`, which is
 		// a controlled prop only the HOC knows about — the Base hook only
 		// deals with inputValue/menuIsOpen and has no concept of selection.
-		const allOption = selectAllOption
-			? selectAllOption(asyncPaginateProps.inputValue, {
-					value,
-					options: asyncPaginateProps.options,
-					hasMore: asyncPaginateProps.hasMore,
-				})
-			: null;
+		const allOption = useMemo(
+			() =>
+				selectAllOption
+					? selectAllOption(asyncPaginateProps.inputValue, {
+							value,
+							options: asyncPaginateProps.options,
+							hasMore: asyncPaginateProps.hasMore,
+						})
+					: null,
+			[
+				selectAllOption,
+				asyncPaginateProps.inputValue,
+				asyncPaginateProps.options,
+				asyncPaginateProps.hasMore,
+				value,
+			],
+		);
 
-		const optionsWithSelectAll = allOption
-			? [allOption, ...(asyncPaginateProps.options as unknown[])]
-			: asyncPaginateProps.options;
+		const optionsWithSelectAll = useMemo(
+			() =>
+				allOption
+					? [allOption, ...(asyncPaginateProps.options as unknown[])]
+					: asyncPaginateProps.options,
+			[allOption, asyncPaginateProps.options],
+		);
 
 		// Pins selected option(s) to the top, ahead of whatever
 		// mapOptionsForMenu already produced. Flat options only — bails out
 		// (returns options unchanged) the moment it sees a grouped shape,
 		// since "top of the menu" is ambiguous once options are grouped.
-		const menuOptions = showSelectedOnTop
-			? mergeSelectedOnTop(optionsWithSelectAll, value, valueFieldName)
-			: optionsWithSelectAll;
+		const menuOptions = useMemo(
+			() =>
+				showSelectedOnTop
+					? mergeSelectedOnTop(optionsWithSelectAll, value, valueFieldName)
+					: optionsWithSelectAll,
+			[showSelectedOnTop, optionsWithSelectAll, value, valueFieldName],
+		);
 
 		// hideSelectedOptions hides every selected option via CSS, so once
 		// every currently loaded option is selected (and there's nothing left
 		// to load) the dropdown looks empty even though it isn't. Flat
 		// `options` only — bails out for grouped (`GroupBase[]`) options, same
 		// as `mergeSelectedOnTop`.
-		const showNoMoreOptionsPlaceholder = (() => {
-			if (!hideSelectedOptions || asyncPaginateProps.hasMore) {
-				return false;
-			}
-
-			const loadedOptions = asyncPaginateProps.options;
-
-			if (loadedOptions.length === 0) {
-				return false;
-			}
-
-			if (
-				loadedOptions.some(
-					(option) =>
-						option && typeof option === "object" && "options" in option,
-				)
-			) {
-				return false;
-			}
-
-			const selected =
-				value == null ? [] : Array.isArray(value) ? value : [value];
-			const selectedKeys = new Set(
-				selected.map(
-					(option) => (option as Record<string, unknown>)[valueFieldName],
-				),
-			);
-
-			return (loadedOptions as Record<string, unknown>[]).every((option) =>
-				selectedKeys.has(option[valueFieldName]),
-			);
-		})();
+		const showNoMoreOptionsPlaceholder =
+			hideSelectedOptions &&
+			!asyncPaginateProps.hasMore &&
+			allLoadedOptionsSelected;
 
 		const resolvedDropdownRender: AntdDropdownRender | undefined =
 			showNoMoreOptionsPlaceholder

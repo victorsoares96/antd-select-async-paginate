@@ -1,3 +1,6 @@
+import { buildSelectedValuesSet, isGroupedOptions } from "./selectionUtils";
+import type { GroupBase, SelectAllOptionContext } from "./types";
+
 export type SelectAllOptionValue<Value extends string> =
 	| Value
 	| `${Value}:${string}`;
@@ -11,19 +14,10 @@ export type CreateSelectAllOptionParams<Value extends string, Label> = {
 	searchLabel: (inputValue: string) => Label;
 };
 
-export type SelectAllOptionContext<OptionType extends { value: unknown }> = {
-	/** Currently selected value(s), as controlled by the consumer */
-	value: OptionType | readonly OptionType[] | null | undefined;
-	/** Currently loaded options (post `mapOptionsForMenu`) — flat or grouped */
-	options: ReadonlyArray<OptionType | { options: readonly OptionType[] }>;
-	/** Whether more pages are still available to load */
-	hasMore: boolean;
-};
-
 export type SelectAllOptionBuilder<Value extends string, Label> = {
 	<OptionType extends { value: unknown }>(
 		inputValue: string,
-		context?: SelectAllOptionContext<OptionType>,
+		context?: SelectAllOptionContext<OptionType, GroupBase<OptionType>>,
 	): { value: SelectAllOptionValue<Value>; label: Label } | null;
 	/**
 	 * Matches both the unfiltered and search-scoped select-all options this
@@ -32,30 +26,22 @@ export type SelectAllOptionBuilder<Value extends string, Label> = {
 	isSelectAllOption: (option: { value: unknown }) => boolean;
 };
 
-// Grouped options (`GroupBase[]`) have no flat item list to compare
-// against — bail out the same way `mergeSelectedOnTop` does for
-// `showSelectedOnTop`.
-function isGrouped<OptionType extends { value: unknown }>(
-	context: SelectAllOptionContext<OptionType>,
-): boolean {
-	return context.options.some((option) => "options" in option);
-}
-
 // Selecting "all" only means something with 2+ unselected items on offer.
 // Waits for hasMore=false before hiding: while more pages could still load,
 // today's small remaining count might grow once they arrive.
 function hasFewerThanTwoUnselectedOptions<
 	OptionType extends { value: unknown },
->(context: SelectAllOptionContext<OptionType> | undefined): boolean {
-	if (!context || context.hasMore || isGrouped(context)) {
+>(
+	context:
+		| SelectAllOptionContext<OptionType, GroupBase<OptionType>>
+		| undefined,
+): boolean {
+	if (!context || context.hasMore || isGroupedOptions(context.options)) {
 		return false;
 	}
 
-	const { value } = context;
 	const options = context.options as readonly OptionType[];
-
-	const selected = value == null ? [] : Array.isArray(value) ? value : [value];
-	const selectedValues = new Set(selected.map((option) => option.value));
+	const selectedValues = buildSelectedValuesSet(context.value, "value");
 
 	const unselectedCount = options.filter(
 		(option) => !selectedValues.has(option.value),
@@ -85,7 +71,10 @@ export function createSelectAllOption<Value extends string, Label>({
 
 	const buildSelectAllOption = ((
 		inputValue: string,
-		context?: SelectAllOptionContext<{ value: unknown }>,
+		context?: SelectAllOptionContext<
+			{ value: unknown },
+			GroupBase<{ value: unknown }>
+		>,
 	) => {
 		if (hasFewerThanTwoUnselectedOptions(context)) {
 			return null;
