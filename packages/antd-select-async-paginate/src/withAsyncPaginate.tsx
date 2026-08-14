@@ -1,6 +1,6 @@
 import type { Select as AntdSelect, GetProp } from "antd";
-import type { ReactElement, Ref } from "react";
-import { useCallback, useRef } from "react";
+import type { ReactElement, Ref, UIEvent } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { highlightText } from "./highlightText";
 import type {
 	AsyncPaginateProps,
@@ -163,6 +163,43 @@ export function withAsyncPaginate(
 			(fieldNames as AntdFieldNames | undefined)?.label ?? "label";
 		const valueFieldName =
 			(fieldNames as AntdFieldNames | undefined)?.value ?? "value";
+
+		// hideSelectedOptions hides selected options via `display:none`, which
+		// (in a non-virtual list) removes them from layout — once every
+		// currently loaded option is selected, the popup can run out of
+		// scrollable content before `hasMore` is exhausted, so a real
+		// `onPopupScroll` event never fires again to load the next page.
+		// Re-check scrollability after every render and force the same load
+		// a scroll event would have triggered.
+		useEffect(() => {
+			if (
+				!hideSelectedOptions ||
+				!asyncPaginateProps.menuIsOpen ||
+				!asyncPaginateProps.hasMore ||
+				asyncPaginateProps.isLoading
+			) {
+				return;
+			}
+
+			const dropdown = document.querySelector(
+				`.${hideSelectedOptionsClassNameRef.current}`,
+			);
+			const scrollContainer =
+				dropdown?.querySelector<HTMLElement>(".rc-virtual-list-holder") ??
+				dropdown?.querySelector<HTMLElement>('[role="listbox"]');
+
+			if (!scrollContainer) {
+				return;
+			}
+
+			const { scrollHeight, clientHeight, scrollTop } = scrollContainer;
+
+			if (scrollHeight <= clientHeight) {
+				asyncPaginateProps.handlePopupScroll({
+					currentTarget: { scrollHeight, clientHeight, scrollTop },
+				} as UIEvent<HTMLDivElement>);
+			}
+		});
 
 		// Built here (not in the Base hook) because it needs `value`, which is
 		// a controlled prop only the HOC knows about — the Base hook only
