@@ -70,6 +70,29 @@ describe("HideSelectedOptions", () => {
 		]);
 	});
 
+	test("auto-loads the next page as soon as hiding selected options removes the scrollbar", async () => {
+		// listHeight fits ~2 rows, so page 1 (3 options) overflows and is
+		// scrollable on open — no auto-load yet. Hiding a single selected
+		// option drops the visible list below that height, killing the
+		// scrollbar: from here no real scroll event can ever fire again, so
+		// the next page has to be loaded even though options 2 and 3 are
+		// still unselected.
+		const screen = render(
+			<HideSelectedOptions loadOptions={threePerPage} listHeight={70} />,
+		);
+
+		await openMenu(screen);
+
+		await expect.element(getMenuOption(screen, "Option 3")).toBeInTheDocument();
+		expect(getMenuOption(screen, "Option 4").query()).toBeNull();
+
+		await getMenuOption(screen, "Option 1").click();
+
+		await expect.element(getMenuOption(screen, "Option 4")).toBeInTheDocument();
+
+		expect(getMultipleValue(screen)).toEqual(["Option 1"]);
+	});
+
 	test("shows a placeholder once every loaded option is selected and there's nothing left to load", async () => {
 		const screen = render(<HideSelectedOptions loadOptions={threePerPage} />);
 

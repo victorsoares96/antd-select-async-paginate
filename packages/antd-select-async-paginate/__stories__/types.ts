@@ -5,4 +5,5 @@ export type StoryProps = {
 	hideSelectedOptions?: boolean;
 	isLoading?: boolean;
 	isMulti?: boolean;
+	listHeight?: number;
 };

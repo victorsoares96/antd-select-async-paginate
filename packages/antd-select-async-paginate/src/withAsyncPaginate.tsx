@@ -27,6 +27,21 @@ const defaultNoMoreOptionsContent = "No more options available";
 
 let hideSelectedOptionsUniqCounter = 0;
 
+// Locates the popup's scrolling element without hardcoding antd's internal
+// class names (which would silently break on an antd upgrade): the first
+// descendant whose computed `overflow-y` can actually scroll.
+function findScrollContainer(root: Element): HTMLElement | null {
+	for (const element of root.querySelectorAll<HTMLElement>("*")) {
+		const { overflowY } = getComputedStyle(element);
+
+		if (overflowY === "auto" || overflowY === "scroll") {
+			return element;
+		}
+	}
+
+	return null;
+}
+
 function mergeSelectedOnTop<OptionType>(
 	options: readonly unknown[],
 	value: OptionType | readonly OptionType[] | null | undefined,
@@ -176,14 +191,6 @@ export function withAsyncPaginate(
 			asyncPaginateProps.options as unknown[],
 		);
 
-		// hideSelectedOptions hides every selected option via CSS, so once
-		// every currently loaded option is selected the popup runs out of
-		// visible content before `hasMore` is exhausted — a real
-		// `onPopupScroll` event would then never fire again to load the next
-		// page. Detected directly from data (not DOM measurement, which would
-		// silently break if antd renamed its internal scroll container), and
-		// synthesizes the same load a real bottom-scroll would have
-		// triggered.
 		const allLoadedOptionsSelected =
 			!loadedOptionsAreGrouped &&
 			everyOptionSelected(
@@ -192,28 +199,62 @@ export function withAsyncPaginate(
 				valueFieldName,
 			);
 
+		// hideSelectedOptions hides selected options via `display:none`, so
+		// they stop taking up space in the popup. Once the remaining visible
+		// options no longer overflow `listHeight` the scrollbar disappears —
+		// and with it any chance of a real `onPopupScroll` event ever firing
+		// again, which is the only thing that normally loads the next page.
+		// Re-measure after each render (bounded to one load per distinct
+		// input/options/selection state, so a page that lands still too short
+		// retries but a stable state never loops) and synthesize the load a
+		// bottom-scroll would have triggered.
+		const autoLoadStateRef = useRef<string>(undefined);
+
 		useEffect(() => {
-			if (
-				!hideSelectedOptions ||
-				!asyncPaginateProps.menuIsOpen ||
-				!asyncPaginateProps.hasMore ||
-				asyncPaginateProps.isLoading ||
-				!allLoadedOptionsSelected
-			) {
+			if (!hideSelectedOptions || !asyncPaginateProps.menuIsOpen) {
+				autoLoadStateRef.current = undefined;
 				return;
 			}
 
+			if (!asyncPaginateProps.hasMore || asyncPaginateProps.isLoading) {
+				return;
+			}
+
+			const autoLoadState = `${asyncPaginateProps.inputValue}:${asyncPaginateProps.options.length}:${selectedValues.size}`;
+
+			if (autoLoadStateRef.current === autoLoadState) {
+				return;
+			}
+
+			const dropdown = document.querySelector(
+				`.${hideSelectedOptionsClassNameRef.current}`,
+			);
+			const scrollContainer = dropdown ? findScrollContainer(dropdown) : null;
+
+			if (!scrollContainer) {
+				return;
+			}
+
+			const { scrollHeight, clientHeight, scrollTop } = scrollContainer;
+
+			// A zero-height container is ambiguous: either every loaded option
+			// is hidden (genuinely unscrollable — load more), or the popup
+			// simply hasn't been laid out yet (skip, and re-measure on the
+			// next render instead of loading a page for nothing).
+			if (clientHeight === 0 && !allLoadedOptionsSelected) {
+				return;
+			}
+
+			if (scrollHeight > clientHeight) {
+				return;
+			}
+
+			autoLoadStateRef.current = autoLoadState;
+
 			asyncPaginateProps.handlePopupScroll({
-				currentTarget: { scrollHeight: 0, clientHeight: 0, scrollTop: 0 },
+				currentTarget: { scrollHeight, clientHeight, scrollTop },
 			} as UIEvent<HTMLDivElement>);
-		}, [
-			hideSelectedOptions,
-			asyncPaginateProps.menuIsOpen,
-			asyncPaginateProps.hasMore,
-			asyncPaginateProps.isLoading,
-			asyncPaginateProps.handlePopupScroll,
-			allLoadedOptionsSelected,
-		]);
+		});
 
 		// Built here (not in the Base hook) because it needs `value`, which is
 		// a controlled prop only the HOC knows about — the Base hook only
