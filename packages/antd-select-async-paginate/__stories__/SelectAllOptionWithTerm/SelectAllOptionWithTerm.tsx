@@ -18,6 +18,9 @@ type SelectAllOptionWithTermStoryProps = StoryProps & {
 type OptionType = {
 	value: string;
 	label: string;
+	/** attached by `searchExtra` below, never present on a real option */
+	isATerm?: boolean;
+	term?: string;
 };
 
 const options: OptionType[] = [];
@@ -62,10 +65,18 @@ export const loadOptions: LoadOptions<
 // `createSelectAllOption` builds once a search term is active, distinct
 // from the unfiltered "Todos" value/label so it never collides with a real
 // option's value.
+//
+// `searchValue` takes over building that value (instead of the default
+// `__all__:<search>`), and `searchExtra` attaches extra props to the option
+// so `onChange` can tell a "search term" pick apart from a real option
+// without parsing its value. `isSelectAllOption` keeps matching either way:
+// the builder remembers every value it hands out.
 export const selectAllOption = createSelectAllOption({
 	value: "__all__",
 	label: "Todos",
+	searchValue: (search) => `term:${search}`,
 	searchLabel: (search) => `Todos com o termo: "${search}"`,
+	searchExtra: (search) => ({ isATerm: true, term: search }),
 });
 
 export function SelectAllOptionWithTerm(

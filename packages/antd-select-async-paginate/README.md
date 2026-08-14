@@ -232,9 +232,44 @@ const selectAllOption = createSelectAllOption({
 />
 ```
 
+Both variants accept extra props, and the search-scoped variant can build its own value:
+
+```javascript
+const selectAllOption = createSelectAllOption({
+  value: '__all__',
+  label: 'All',
+  // merged into the option when there's no active search
+  extra: { isSelectAll: true },
+
+  // builds the value while a search is active — defaults to `__all__:<search>`
+  searchValue: (search) => `term:${search}`,
+  searchLabel: (search) => `All matching "${search}"`,
+  // merged into the option while a search is active
+  searchExtra: (search) => ({ isATerm: true, term: search }),
+});
+
+selectAllOption('abc');
+// { value: 'term:abc', label: 'All matching "abc"', isATerm: true, term: 'abc' }
+```
+
+Extras are inferred into the returned option's type, so `onChange` can read them without a cast. They can't contain `value` or `label` (compile-time error) — those belong to `value`/`searchValue` and `label`/`searchLabel`.
+
+`isSelectAllOption` keeps working with a custom `searchValue`: the builder remembers every value it hands out. If you need to recognize a select-all value this builder never produced — one restored from the server after a reload, say — pass your own `isSelectAllOption` to replace the built-in matching:
+
+```javascript
+const selectAllOption = createSelectAllOption({
+  value: '__all__',
+  label: 'All',
+  searchValue: (search) => `term:${search}`,
+  searchLabel: (search) => `All matching "${search}"`,
+  isSelectAllOption: (option) =>
+    option.value === '__all__' || String(option.value).startsWith('term:'),
+});
+```
+
 For any other `OptionType` shape, write `selectAllOption`/`isSelectAllOption` by hand as shown above.
 
-See the `Select all option` story in `__stories__` for a complete example.
+See the `Select all option` and `Select all option with term` stories in `__stories__` for complete examples.
 
 ## Differences from react-select-async-paginate
 

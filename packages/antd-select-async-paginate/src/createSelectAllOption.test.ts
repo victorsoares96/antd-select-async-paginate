@@ -171,6 +171,121 @@ describe("createSelectAllOption", () => {
 		).toBe(null);
 	});
 
+	test("merges `extra` into the unfiltered option", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			extra: { isSelectAll: true },
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+		});
+
+		expect(selectAllOption("")).toEqual({
+			value: "__all__",
+			label: "Todos",
+			isSelectAll: true,
+		});
+	});
+
+	test("merges `searchExtra` into the search-scoped option, passing it the search value", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchExtra: (search) => ({ isATerm: true, term: search }),
+		});
+
+		expect(selectAllOption("abc")).toEqual({
+			value: "__all__:abc",
+			label: 'Todos com o termo: "abc"',
+			isATerm: true,
+			term: "abc",
+		});
+	});
+
+	test("keeps each variant's extras to itself", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			extra: { isSelectAll: true },
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchExtra: () => ({ isATerm: true }),
+		});
+
+		expect(selectAllOption("")).toEqual({
+			value: "__all__",
+			label: "Todos",
+			isSelectAll: true,
+		});
+
+		expect(selectAllOption("abc")).toEqual({
+			value: "__all__:abc",
+			label: 'Todos com o termo: "abc"',
+			isATerm: true,
+		});
+	});
+
+	test("builds the search-scoped value with `searchValue` when provided", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchValue: (search) => `term:${search}`,
+		});
+
+		expect(selectAllOption("abc")).toEqual({
+			value: "term:abc",
+			label: 'Todos com o termo: "abc"',
+		});
+	});
+
+	test("isSelectAllOption matches a custom search value once it has been built", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchValue: (search) => `term:${search}`,
+		});
+
+		selectAllOption("abc");
+
+		expect(selectAllOption.isSelectAllOption({ value: "term:abc" })).toBe(true);
+		expect(selectAllOption.isSelectAllOption({ value: "__all__" })).toBe(true);
+		expect(selectAllOption.isSelectAllOption({ value: "option-1" })).toBe(
+			false,
+		);
+	});
+
+	test("isSelectAllOption stops falling back to the base prefix when searchValue is customized", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchValue: (search) => `term:${search}`,
+		});
+
+		// never emitted by this builder, and the `__all__:` format is no
+		// longer what it produces
+		expect(selectAllOption.isSelectAllOption({ value: "__all__:abc" })).toBe(
+			false,
+		);
+	});
+
+	test("a custom isSelectAllOption overrides the built-in matching", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+			searchValue: (search) => `term:${search}`,
+			isSelectAllOption: (option) =>
+				String(option.value).startsWith("server-all"),
+		});
+
+		expect(selectAllOption.isSelectAllOption({ value: "server-all:abc" })).toBe(
+			true,
+		);
+		expect(selectAllOption.isSelectAllOption({ value: "__all__" })).toBe(false);
+	});
+
 	test("isSelectAllOption still matches when value bypasses the `Value extends string` constraint (cast/plain JS) and is a number", () => {
 		const selectAllOption = createSelectAllOption({
 			// biome-ignore lint/suspicious/noExplicitAny: simulating a caller that bypasses the `Value extends string` constraint via a cast
