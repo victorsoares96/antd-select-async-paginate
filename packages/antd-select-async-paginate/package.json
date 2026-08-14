@@ -1,9 +1,10 @@
 {
   "name": "antd-select-async-paginate",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Wrapper above antd Select that supports pagination on menu scroll",
   "files": [
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -21,7 +22,11 @@
     "async",
     "pagination"
   ],
-  "repository": "git@github.com:victorsoares96/antd-select-async-paginate.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorsoares96/antd-select-async-paginate.git",
+    "directory": "packages/antd-select-async-paginate"
+  },
   "homepage": "https://github.com/victorsoares96/antd-select-async-paginate/tree/master/packages/antd-select-async-paginate",
   "author": "Victor Soares",
   "license": "MIT",
