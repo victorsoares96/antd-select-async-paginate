@@ -41,15 +41,13 @@ function isGrouped<OptionType extends { value: unknown }>(
 	return context.options.some((option) => "options" in option);
 }
 
-function isEverySelected<OptionType extends { value: unknown }>(
-	context: SelectAllOptionContext<OptionType> | undefined,
-): boolean {
-	if (
-		!context ||
-		context.hasMore ||
-		context.options.length === 0 ||
-		isGrouped(context)
-	) {
+// Selecting "all" only means something with 2+ unselected items on offer.
+// Waits for hasMore=false before hiding: while more pages could still load,
+// today's small remaining count might grow once they arrive.
+function hasFewerThanTwoUnselectedOptions<
+	OptionType extends { value: unknown },
+>(context: SelectAllOptionContext<OptionType> | undefined): boolean {
+	if (!context || context.hasMore || isGrouped(context)) {
 		return false;
 	}
 
@@ -59,19 +57,11 @@ function isEverySelected<OptionType extends { value: unknown }>(
 	const selected = value == null ? [] : Array.isArray(value) ? value : [value];
 	const selectedValues = new Set(selected.map((option) => option.value));
 
-	return options.every((option) => selectedValues.has(option.value));
-}
+	const unselectedCount = options.filter(
+		(option) => !selectedValues.has(option.value),
+	).length;
 
-// Selecting "all" only means something with 2+ items on offer — with 0 or 1
-// loaded, hide the option regardless of hasMore/selection state.
-function hasFewerThanTwoOptions<OptionType extends { value: unknown }>(
-	context: SelectAllOptionContext<OptionType> | undefined,
-): boolean {
-	if (!context || isGrouped(context)) {
-		return false;
-	}
-
-	return context.options.length < 2;
+	return unselectedCount < 2;
 }
 
 /**
@@ -97,7 +87,7 @@ export function createSelectAllOption<Value extends string, Label>({
 		inputValue: string,
 		context?: SelectAllOptionContext<{ value: unknown }>,
 	) => {
-		if (isEverySelected(context) || hasFewerThanTwoOptions(context)) {
+		if (hasFewerThanTwoUnselectedOptions(context)) {
 			return null;
 		}
 

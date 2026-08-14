@@ -88,7 +88,7 @@ describe("createSelectAllOption", () => {
 		).toEqual({ value: "__all__", label: "Todos" });
 	});
 
-	test("still returns the option when not every loaded option is selected", () => {
+	test("returns null when only 1 loaded option remains unselected and there are no more pages", () => {
 		const selectAllOption = createSelectAllOption({
 			value: "__all__",
 			label: "Todos",
@@ -98,6 +98,28 @@ describe("createSelectAllOption", () => {
 		const options = [
 			{ value: "option-1", label: "Option 1" },
 			{ value: "option-2", label: "Option 2" },
+		];
+
+		expect(
+			selectAllOption("", {
+				value: [options[0]],
+				options,
+				hasMore: false,
+			}),
+		).toBe(null);
+	});
+
+	test("still returns the option when 2+ loaded options remain unselected", () => {
+		const selectAllOption = createSelectAllOption({
+			value: "__all__",
+			label: "Todos",
+			searchLabel: (search) => `Todos com o termo: "${search}"`,
+		});
+
+		const options = [
+			{ value: "option-1", label: "Option 1" },
+			{ value: "option-2", label: "Option 2" },
+			{ value: "option-3", label: "Option 3" },
 		];
 
 		expect(
@@ -121,7 +143,7 @@ describe("createSelectAllOption", () => {
 		).toBe(null);
 	});
 
-	test("returns null when fewer than 2 options are loaded, even if none are selected and hasMore is true", () => {
+	test("still returns the option when hasMore is true, even with only 1 unselected option loaded", () => {
 		const selectAllOption = createSelectAllOption({
 			value: "__all__",
 			label: "Todos",
@@ -130,29 +152,12 @@ describe("createSelectAllOption", () => {
 
 		const options = [{ value: "option-1", label: "Option 1" }];
 
-		expect(selectAllOption("", { value: null, options, hasMore: true })).toBe(
-			null,
-		);
-	});
-
-	test("returns the option once exactly 2 options are loaded", () => {
-		const selectAllOption = createSelectAllOption({
-			value: "__all__",
-			label: "Todos",
-			searchLabel: (search) => `Todos com o termo: "${search}"`,
-		});
-
-		const options = [
-			{ value: "option-1", label: "Option 1" },
-			{ value: "option-2", label: "Option 2" },
-		];
-
 		expect(
 			selectAllOption("", { value: null, options, hasMore: true }),
 		).toEqual({ value: "__all__", label: "Todos" });
 	});
 
-	test("applies the fewer-than-2 rule to the search-scoped variant too", () => {
+	test("applies the fewer-than-2-unselected rule to the search-scoped variant too", () => {
 		const selectAllOption = createSelectAllOption({
 			value: "__all__",
 			label: "Todos",
