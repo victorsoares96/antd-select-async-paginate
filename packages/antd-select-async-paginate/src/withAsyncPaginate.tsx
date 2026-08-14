@@ -2,6 +2,7 @@ import type { Select as AntdSelect, GetProp } from "antd";
 import type { ReactElement, Ref, UIEvent } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { highlightText } from "./highlightText";
+import { OptionLabelWithTooltip } from "./OptionLabelWithTooltip";
 import type {
 	AsyncPaginateProps,
 	GroupBase,
@@ -288,7 +289,7 @@ export function withAsyncPaginate(
 		const highlightOptions =
 			highlightSearchTerm === true ? {} : highlightSearchTerm || undefined;
 
-		const resolvedOptionRender: AntdOptionRender | undefined =
+		const baseOptionRender: AntdOptionRender | undefined =
 			optionRender ??
 			(highlightOptions
 				? (option) => {
@@ -307,6 +308,25 @@ export function withAsyncPaginate(
 						);
 					}
 				: undefined);
+
+		// Antd sets a native `title` on the option node unconditionally, so the
+		// browser tooltip appears even when the label isn't truncated. Wrap the
+		// rendered label so `title` is only set (on hover) when the text actually
+		// overflows its available width.
+		const resolvedOptionRender: AntdOptionRender = (option, info) => {
+			const rendered = baseOptionRender
+				? baseOptionRender(option, info)
+				: option.label;
+
+			const rawLabel = (option.data as Record<string, unknown>)[labelFieldName];
+
+			return (
+				<OptionLabelWithTooltip
+					label={rendered}
+					title={typeof rawLabel === "string" ? rawLabel : undefined}
+				/>
+			);
+		};
 
 		// antd's onChange(value, option) always gives the full option object(s)
 		// as the 2nd argument — that's what this library's value/onChange
