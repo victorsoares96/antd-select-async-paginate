@@ -176,3 +176,10 @@ dist
 
 # vitest reports
 __screenshots__
+
+# Editor swap files
+*.swp
+*.swo
+*.swn
+*~
+*.tmp
